@@ -23,6 +23,7 @@ import type {
   Level,
   LogEntry,
   Move,
+  Pending,
   PlayerState,
   PublicState,
   Seat,
@@ -157,23 +158,27 @@ function buy(s: GameState, seat: Seat, cardId: string): void {
   player.cards.push({ id: cardId, color: card.bonus === 'joker' ? null : card.bonus });
   log(s, { t: 'buy', p: seat, card: cardId, paid: payment, fromReserve: position === null });
 
-  if (card.bonus === 'joker') pub.pending.push({ kind: 'joker', cardId });
-  switch (card.ability) {
-    case 'extraTurn':
-      pub.flags.extraTurn = true;
-      break;
-    case 'privilege':
-      gainPrivilege(s, seat);
-      break;
-    case 'token':
-      if (card.bonus && card.bonus !== 'joker')
-        pub.pending.push({ kind: 'token', color: card.bonus });
-      break;
-    case 'steal':
-      pub.pending.push({ kind: 'steal' });
-      break;
-    case null:
-      break;
+  // Capacités dans l'ordre du fichier de données (ex. L3-12 : association puis rejouer).
+  for (const ability of card.abilities) {
+    switch (ability) {
+      case 'associate':
+        pub.pending.push({ kind: 'joker', cardId });
+        break;
+      case 'extra_turn':
+        pub.flags.extraTurn = true;
+        break;
+      case 'take_privilege':
+        gainPrivilege(s, seat);
+        break;
+      case 'take_token':
+        if (card.bonus && card.bonus !== 'joker') {
+          pub.pending.push({ kind: 'token', color: card.bonus });
+        }
+        break;
+      case 'steal_token':
+        pub.pending.push({ kind: 'steal' });
+        break;
+    }
   }
 
   const crownsAfter = crowns(player);
@@ -284,19 +289,22 @@ export function applyMove(state: GameState, seat: Seat, move: Move): GameState {
       pub.royals = pub.royals.filter((id) => id !== move.royalId);
       player.royals.push(move.royalId);
       log(s, { t: 'royal', p: seat, royal: move.royalId });
-      switch (getRoyal(move.royalId).ability) {
-        case 'extraTurn':
-          pub.flags.extraTurn = true;
-          break;
-        case 'privilege':
-          gainPrivilege(s, seat);
-          break;
-        case 'steal':
-          pub.pending.unshift({ kind: 'steal' });
-          break;
-        case null:
-          break;
+      // Les décisions de la carte Royale passent avant les éventuelles suivantes de la file.
+      const royalDecisions: Pending[] = [];
+      for (const ability of getRoyal(move.royalId).abilities) {
+        switch (ability) {
+          case 'extra_turn':
+            pub.flags.extraTurn = true;
+            break;
+          case 'take_privilege':
+            gainPrivilege(s, seat);
+            break;
+          case 'steal_token':
+            royalDecisions.push({ kind: 'steal' });
+            break;
+        }
       }
+      pub.pending.unshift(...royalDecisions);
       advance(s);
       return s;
     }

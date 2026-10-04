@@ -7,7 +7,7 @@ import {
   validateMove,
 } from '@gld/engine';
 import type { Level, Move, PlayerView } from '@gld/engine';
-import { ABILITIES, CARD_KINDS, LEVEL_THEME, RESOURCES, TERMS } from '../theme';
+import { ABILITIES, CARD_KINDS, cardTheme, LEVEL_THEME, RESOURCES, TERMS } from '../theme';
 import { ILLEGAL_MESSAGES, tokensText } from '../text';
 import { CardBack, CardView } from './Cards';
 import { Modal } from './Modal';
@@ -82,18 +82,17 @@ export function CardSheet({ target, view, canAct, legal, onBuy, onReserve, onClo
   const buyReason = validateMove(view, { type: 'buy', cardId: card.id });
   const payment = computePayment(card, me);
   const remaining = effectiveCost(card, me);
-  const ability =
-    card.bonus === 'joker' ? ABILITIES.joker : card.ability ? ABILITIES[card.ability] : null;
+  const theme = cardTheme(card);
 
   return (
-    <Modal title={card.name} onClose={onClose}>
+    <Modal title={theme.name} onClose={onClose}>
       <div className="sheet">
         <CardView cardId={card.id} size="lg" />
         <div className="sheet-info">
           <dl className="facts">
             <dt>Type</dt>
             <dd>
-              {CARD_KINDS[card.kind]} · niveau {card.level}
+              {CARD_KINDS[theme.kind]} · niveau {card.level}
             </dd>
             <dt>{TERMS.points}</dt>
             <dd>{card.points}</dd>
@@ -107,11 +106,15 @@ export function CardSheet({ target, view, canAct, legal, onBuy, onReserve, onClo
                   ? 'polyvalent'
                   : `${card.bonusCount} ${RESOURCES[card.bonus].name}`}
             </dd>
-            {ability && (
+            {card.abilities.length > 0 && (
               <>
-                <dt>Capacité</dt>
+                <dt>{card.abilities.length > 1 ? 'Capacités' : 'Capacité'}</dt>
                 <dd>
-                  {ability.icon} {ability.label} — {ability.help}
+                  {card.abilities.map((a) => (
+                    <span key={a} className="ability-line">
+                      {ABILITIES[a].icon} {ABILITIES[a].label} — {ABILITIES[a].help}
+                    </span>
+                  ))}
                 </dd>
               </>
             )}

@@ -52,7 +52,7 @@ tests et les interprétations de règles retenues. Il est la référence pour re
 ├── eslint.config.js / .prettierrc.json / tsconfig.base.json
 └── packages/
     ├── engine/                     # moteur de règles pur
-    │   ├── data/cards.json         # 67 cartes + 4 cartes Empereur (validées par Zod)
+    │   ├── data/cards.json         # source de vérité : 67 cartes, 4 Royales, meta (validés par Zod)
     │   ├── src/
     │   │   ├── types.ts            # types du domaine, coups, état, journal
     │   │   ├── schema.ts           # schémas Zod (données de cartes, coups)

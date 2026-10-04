@@ -98,7 +98,7 @@ describe('action obligatoire : réserver une carte', () => {
 });
 
 describe('action obligatoire : acheter une carte', () => {
-  const plain = findCard((c) => c.level === 1 && c.ability === null && c.bonus === 'white');
+  const plain = findCard((c) => c.level === 1 && c.abilities.length === 0 && c.bonus === 'white');
 
   it('paie le coût, remet les jetons dans le sac et remplace la carte', () => {
     const s = newGame();
@@ -128,7 +128,9 @@ describe('action obligatoire : acheter une carte', () => {
       (c) => c.level === 2 && (c.cost.pearl ?? 0) === 1 && c.bonus !== 'joker',
     );
     const [colorA] = Object.keys(target.cost).filter((k) => k !== 'pearl') as ('white' | 'blue')[];
-    const bonusCard = findCard((c) => c.level === 1 && c.bonus === colorA && c.ability === null);
+    const bonusCard = findCard(
+      (c) => c.level === 1 && c.bonus === colorA && c.abilities.length === 0,
+    );
     giveCard(s, 0, bonusCard.id);
     const cost = effectiveCost(target, s.pub.players[0]);
     expect(cost[colorA!]).toBe((target.cost[colorA!] ?? 0) - 1);

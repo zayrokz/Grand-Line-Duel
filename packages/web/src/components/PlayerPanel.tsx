@@ -1,5 +1,5 @@
 import type { CSSProperties } from 'react';
-import { GEM_COLORS, summarize, TOKEN_COLORS } from '@gld/engine';
+import { GEM_COLORS, MAX_TOKENS, summarize, TOKEN_COLORS } from '@gld/engine';
 import type { PlayerState, SeatInfo } from '@gld/engine';
 import { ICONS, RESOURCES, TERMS } from '../theme';
 import { Avatar } from './Avatar';
@@ -45,12 +45,12 @@ export function PlayerPanel({ info, player, active, isMe, reserved, onReserved, 
         </div>
       </header>
 
-      <div className="player-tokens" aria-label={`Jetons (${s.tokens}/10)`}>
+      <div className="player-tokens" aria-label={`Jetons (${s.tokens}/${MAX_TOKENS})`}>
         {TOKEN_COLORS.map((color) => (
           <TokenCount key={color} color={color} count={player.tokens[color]} />
         ))}
-        <span className="token-total" data-full={s.tokens >= 10}>
-          {s.tokens}/10
+        <span className="token-total" data-full={s.tokens >= MAX_TOKENS}>
+          {s.tokens}/{MAX_TOKENS}
         </span>
       </div>
 

@@ -5,3 +5,4 @@ packages/web/dev-dist
 *.log
 package-lock.json
 .firebaserc.example
+packages/engine/data/cards.json

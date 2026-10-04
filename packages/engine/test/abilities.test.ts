@@ -30,7 +30,7 @@ function buyNow(s: GameState, card: CardDef): GameState {
 }
 
 describe('capacité : rejouer', () => {
-  const card = findCard((c) => c.ability === 'extraTurn' && c.level === 1);
+  const card = findCard((c) => c.abilities.includes('extra_turn') && c.level === 1);
 
   it('termine le tour et en donne un nouveau au même joueur', () => {
     const s = newGame();
@@ -49,7 +49,7 @@ describe('capacité : rejouer', () => {
     const s = newGame();
     s.pub.flags.extraTurn = true;
     s.pub.pending = [{ kind: 'royal' }];
-    const t = play(s, { type: 'chooseRoyal', royalId: 'E4' }); // E4 : rejouer
+    const t = play(s, { type: 'chooseRoyal', royalId: 'R-4' }); // R-4 : rejouer
     expect(t.pub.current).toBe(0);
     setBoard(t, { 0: 'red' });
     expect(play(t, { type: 'takeTokens', cells: [0] }).pub.current).toBe(1);
@@ -58,8 +58,8 @@ describe('capacité : rejouer', () => {
 
 describe('capacité : bonus joker', () => {
   const joker = findCard((c) => c.bonus === 'joker' && c.level === 1);
-  const red = findCard((c) => c.bonus === 'red' && c.level === 1 && c.ability === null);
-  const blue = findCard((c) => c.bonus === 'blue' && c.level === 1 && c.ability === null);
+  const red = findCard((c) => c.bonus === 'red' && c.level === 1 && c.abilities.length === 0);
+  const blue = findCard((c) => c.bonus === 'blue' && c.level === 1 && c.abilities.length === 0);
 
   it('ne peut pas être acheté sans carte à bonus coloré', () => {
     const s = newGame();
@@ -90,8 +90,27 @@ describe('capacité : bonus joker', () => {
   });
 });
 
+describe('carte à plusieurs capacités', () => {
+  it('L3-12 : association puis tour supplémentaire', () => {
+    const s = newGame();
+    giveCard(
+      s,
+      0,
+      findCard((c) => c.bonus === 'black' && c.level === 1 && c.abilities.length === 0).id,
+    );
+    const multi = findCard((c) => c.id === 'L3-12');
+    const t = buyNow(s, multi);
+    expect(t.pub.pending).toEqual([{ kind: 'joker', cardId: 'L3-12' }]);
+    expect(t.pub.flags.extraTurn).toBe(true);
+    const u = play(t, { type: 'jokerColor', color: 'black' });
+    expect(u.pub.current).toBe(0);
+    expect(u.pub.log.at(-1)).toEqual({ t: 'turn', p: 0, extra: true });
+    expect(pointsByColor(u.pub.players[0]).black).toBe(multi.points);
+  });
+});
+
 describe('capacité : jeton', () => {
-  const card = findCard((c) => c.ability === 'token' && c.bonus === 'green');
+  const card = findCard((c) => c.abilities.includes('take_token') && c.bonus === 'green');
 
   it('prend 1 jeton de la couleur du bonus sur le plateau', () => {
     const s = newGame();
@@ -115,7 +134,7 @@ describe('capacité : jeton', () => {
 });
 
 describe('capacité : Log Pose', () => {
-  const card = findCard((c) => c.ability === 'privilege' && c.level === 1);
+  const card = findCard((c) => c.abilities.includes('take_privilege'));
 
   it('prend 1 Log Pose dans la réserve', () => {
     const s = newGame();
@@ -135,7 +154,7 @@ describe('capacité : Log Pose', () => {
 });
 
 describe('capacité : vol', () => {
-  const card = findCard((c) => c.ability === 'steal' && c.level === 1);
+  const card = findCard((c) => c.abilities.includes('steal_token'));
 
   it('prend 1 Gemme ou Perle à l’adversaire, jamais d’Or', () => {
     const s = newGame();
@@ -175,17 +194,17 @@ describe('Primes et cartes Empereur', () => {
     expect(t.pub.pending).toEqual([{ kind: 'royal' }]);
     expect(getLegalMoves(view(t))).toHaveLength(4);
     expect(validateMove(view(t), { type: 'chooseRoyal', royalId: 'E9' })).toBe('invalid-royal');
-    const u = play(t, { type: 'chooseRoyal', royalId: 'E1' });
-    expect(u.pub.players[0].royals).toEqual(['E1']);
-    expect(u.pub.royals).toEqual(['E2', 'E3', 'E4']);
+    const u = play(t, { type: 'chooseRoyal', royalId: 'R-3' });
+    expect(u.pub.players[0].royals).toEqual(['R-3']);
+    expect(u.pub.royals).toEqual(['R-1', 'R-2', 'R-4']);
     expect(u.pub.current).toBe(1);
   });
 
   it('ne redonne pas de carte Empereur entre la 3e et la 6e Prime', () => {
     const s = newGame();
     for (const color of ['blue', 'green', 'red']) giveCard(s, 0, crownCards(color).id);
-    s.pub.players[0].royals = ['E1'];
-    s.pub.royals = ['E2', 'E3', 'E4'];
+    s.pub.players[0].royals = ['R-3'];
+    s.pub.royals = ['R-1', 'R-2', 'R-4'];
     const t = buyNow(s, crownCards('white'));
     expect(t.pub.pending).toEqual([]);
     expect(t.pub.current).toBe(1);
@@ -193,11 +212,11 @@ describe('Primes et cartes Empereur', () => {
 
   it('donne une seconde carte Empereur à la 6e Prime', () => {
     const s = newGame();
-    const twoCrowns = findCard((c) => c.level === 2 && c.crowns === 2 && c.bonus === 'red');
+    const twoCrowns = findCard((c) => c.level === 3 && c.crowns === 2 && c.bonus === 'red');
     giveCard(s, 0, twoCrowns.id);
     for (const color of ['blue', 'green', 'black']) giveCard(s, 0, crownCards(color).id);
-    s.pub.players[0].royals = ['E1'];
-    s.pub.royals = ['E2', 'E3', 'E4'];
+    s.pub.players[0].royals = ['R-3'];
+    s.pub.royals = ['R-1', 'R-2', 'R-4'];
     const t = buyNow(s, crownCards('white'));
     expect(t.pub.pending).toEqual([{ kind: 'royal' }]);
   });
@@ -206,19 +225,19 @@ describe('Primes et cartes Empereur', () => {
     const steal = newGame();
     steal.pub.pending = [{ kind: 'royal' }];
     setTokens(steal, 1, { black: 1 });
-    const a = play(steal, { type: 'chooseRoyal', royalId: 'E2' });
+    const a = play(steal, { type: 'chooseRoyal', royalId: 'R-1' });
     expect(a.pub.pending).toEqual([{ kind: 'steal' }]);
     expect(play(a, { type: 'steal', color: 'black' }).pub.players[0].tokens.black).toBe(1);
 
     const privilege = newGame();
     privilege.pub.pending = [{ kind: 'royal' }];
-    expect(play(privilege, { type: 'chooseRoyal', royalId: 'E3' }).pub.players[0].privileges).toBe(
+    expect(play(privilege, { type: 'chooseRoyal', royalId: 'R-2' }).pub.players[0].privileges).toBe(
       1,
     );
 
     const extra = newGame();
     extra.pub.pending = [{ kind: 'royal' }];
-    expect(play(extra, { type: 'chooseRoyal', royalId: 'E4' }).pub.current).toBe(0);
+    expect(play(extra, { type: 'chooseRoyal', royalId: 'R-4' }).pub.current).toBe(0);
   });
 
   it('résout la capacité de la carte avant le choix de la carte Empereur', () => {
@@ -231,11 +250,11 @@ describe('Primes et cartes Empereur', () => {
       { kind: 'joker', cardId: jokerWithCrown.id },
       { kind: 'royal' },
     ]);
-    expect(validateMove(view(t), { type: 'chooseRoyal', royalId: 'E1' })).toBe('wrong-decision');
+    expect(validateMove(view(t), { type: 'chooseRoyal', royalId: 'R-3' })).toBe('wrong-decision');
     const u = play(t, { type: 'jokerColor', color: 'green' });
     expect(u.pub.pending).toEqual([{ kind: 'royal' }]);
-    const w = play(u, { type: 'chooseRoyal', royalId: 'E3' });
-    expect(w.pub.players[0].royals).toEqual(['E3']);
+    const w = play(u, { type: 'chooseRoyal', royalId: 'R-2' });
+    expect(w.pub.players[0].royals).toEqual(['R-2']);
     expect(w.pub.current).toBe(1);
   });
 

@@ -503,10 +503,15 @@ button.card:hover:not(:disabled) {
   font-size: 34cqw;
   line-height: 1;
 }
-.card-ability {
+.card-abilities {
   position: absolute;
   top: 3cqw;
   left: 4cqw;
+  display: flex;
+  flex-direction: column;
+  gap: 2cqw;
+}
+.card-ability {
   font-size: 16cqw;
   background: rgba(255, 255, 255, 0.85);
   border-radius: 50%;
@@ -518,6 +523,9 @@ button.card:hover:not(:disabled) {
 .card-ability-inline {
   margin-left: auto;
   font-size: 16cqw;
+}
+.card-ability-inline + .card-ability-inline {
+  margin-left: 2cqw;
 }
 .card-name {
   font-size: 9.5cqw;
@@ -1012,6 +1020,9 @@ button.card:hover:not(:disabled) {
 }
 .facts dd {
   margin: 0;
+}
+.ability-line {
+  display: block;
 }
 .sheet-actions {
   display: grid;

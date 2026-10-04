@@ -1,5 +1,5 @@
 /** Textes de l'interface en français : erreurs, journal de partie, décisions. */
-import { getCard, getRoyal } from '@gld/engine';
+import { getCard, getRoyal, MAX_RESERVED, MAX_TOKENS } from '@gld/engine';
 import type {
   ApiErrorReason,
   IllegalReason,
@@ -9,7 +9,7 @@ import type {
   TokenColor,
   TokenCounts,
 } from '@gld/engine';
-import { RESOURCES, TERMS, WIN_REASONS } from './theme';
+import { cardTheme, RESOURCES, royalTheme, TERMS, WIN_REASONS } from './theme';
 
 export const ERROR_MESSAGES: Record<ApiErrorReason, string> = {
   'invalid-input': 'Requête invalide.',
@@ -44,7 +44,7 @@ export const ILLEGAL_MESSAGES: Record<IllegalReason, string> = {
   'not-a-line': 'Les jetons doivent être adjacents et en ligne droite.',
   'already-replenished': 'Le plateau a déjà été rempli ce tour-ci.',
   'bag-empty': 'Le sac est vide.',
-  'reserve-limit': 'Tu as déjà 3 cartes réservées.',
+  'reserve-limit': `Tu as déjà ${MAX_RESERVED} cartes réservées.`,
   'gold-required': `Il faut un ${RESOURCES.gold.name} sur le plateau pour réserver.`,
   'card-unavailable': 'Cette carte n’est plus disponible.',
   'deck-empty': 'Ce paquet est vide.',
@@ -98,17 +98,17 @@ export function logText(entry: LogEntry, names: [string, string]): string | null
         entry.from === 'deck' ? 'dessus du paquet' : 'pyramide'
       }).`;
     case 'buy':
-      return `${p} recrute « ${getCard(entry.card).name} »${
+      return `${p} recrute « ${cardTheme(getCard(entry.card)).name} »${
         entry.fromReserve ? ' (réservée)' : ''
       } pour ${tokensText(entry.paid)}.`;
     case 'joker':
-      return `${p} associe « ${getCard(entry.card).name} » à : ${RESOURCES[entry.color].plural}.`;
+      return `${p} associe « ${cardTheme(getCard(entry.card)).name} » à : ${RESOURCES[entry.color].plural}.`;
     case 'abilityToken':
       return `${p} se ravitaille : ${tokenLabel(entry.color)}.`;
     case 'steal':
       return `${p} vole ${tokenLabel(entry.color)} à ${other(entry.p)} !`;
     case 'royal':
-      return `${p} obtient le soutien de « ${getRoyal(entry.royal).name} ».`;
+      return `${p} obtient le soutien de « ${royalTheme(getRoyal(entry.royal)).name} ».`;
     case 'discard':
       return `${p} remet dans le sac : ${tokensText(entry.tokens)}.`;
     case 'pass':
@@ -131,6 +131,6 @@ export function pendingPrompt(pending: Pending, mine: boolean, opponent: string)
     case 'royal':
       return `Nouvelle ${TERMS.crown} ! Choisis une ${TERMS.royal}.`;
     case 'discard':
-      return `Tu as plus de 10 jetons : remets-en ${pending.count} dans le sac.`;
+      return `Tu as plus de ${MAX_TOKENS} jetons : remets-en ${pending.count} dans le sac.`;
   }
 }

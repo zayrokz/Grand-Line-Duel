@@ -1,5 +1,5 @@
 import { ALL_LINES, CELL_COUNT, isStraightLine, isValidCell } from './board.js';
-import { getCard, isCardId } from './cards.js';
+import { getCard, isCardId, isJoker } from './cards.js';
 import {
   bonuses,
   canBuyCard,
@@ -196,7 +196,7 @@ export function validateMove(view: PlayerView, move: Move): IllegalReason | null
         findInPyramid(pub, move.cardId) !== null || view.reserved.includes(move.cardId);
       if (!available) return 'card-unavailable';
       const card = getCard(move.cardId);
-      if (card.bonus === 'joker' && !hasColoredBonus(player)) return 'joker-needs-bonus';
+      if (isJoker(card) && !hasColoredBonus(player)) return 'joker-needs-bonus';
       return computePayment(card, player) ? null : 'cannot-afford';
     }
     case 'jokerColor': {

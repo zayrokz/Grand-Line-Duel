@@ -21,36 +21,55 @@ export const LEVELS: readonly Level[] = [1, 2, 3];
 
 export type Seat = 0 | 1;
 
-export type CardAbility = 'extraTurn' | 'token' | 'privilege' | 'steal';
-export type RoyalAbility = 'extraTurn' | 'privilege' | 'steal';
+/** Capacités des cartes, identifiants repris tels quels du fichier de données. */
+export const CARD_ABILITIES = [
+  'extra_turn',
+  'associate',
+  'take_token',
+  'take_privilege',
+  'steal_token',
+] as const;
+export type CardAbility = (typeof CARD_ABILITIES)[number];
 
-export type CardKind = 'crew' | 'ship' | 'gear';
+/** Capacités possibles d'une carte Royale (pas d'association ni de prise de jeton coloré). */
+export const ROYAL_ABILITIES = ['extra_turn', 'take_privilege', 'steal_token'] as const;
+export type RoyalAbility = (typeof ROYAL_ABILITIES)[number];
 
-/** Coût d'une carte : gemmes et perles (jamais d'Or). */
+/** Coût d'une carte : gemmes et perles (jamais d'Or). Un coût absent vaut 0. */
 export type Cost = Partial<Record<TakeableColor, number>>;
 
+/** Carte Joaillerie, telle que décrite dans `data/cards.json`. */
 export interface CardDef {
   id: string;
   level: Level;
-  name: string;
-  kind: CardKind;
-  /** Placeholder visuel (emoji) ; une image `assets/cards/<id>.*` le remplace côté client. */
-  art: string;
+  /** Famille de la carte (sert au thème pour choisir nom et illustration). */
+  family: string;
   /** Couleur du bonus, `joker` (prend la couleur d'une carte associée) ou `null` (aucun bonus). */
   bonus: GemColor | 'joker' | null;
   bonusCount: number;
   points: number;
   crowns: number;
-  ability: CardAbility | null;
+  /** Capacités appliquées à l'achat, dans l'ordre du fichier. */
+  abilities: readonly CardAbility[];
   cost: Cost;
 }
 
 export interface RoyalDef {
   id: string;
-  name: string;
-  art: string;
   points: number;
-  ability: RoyalAbility | null;
+  abilities: readonly RoyalAbility[];
+}
+
+/** Paramètres de partie issus de `meta` dans `data/cards.json` (source de vérité). */
+export interface GameRules {
+  /** Nombre de jetons de chaque couleur dans la boîte. */
+  tokens: TokenCounts;
+  privileges: number;
+  pyramid: Record<Level, number>;
+  royalThresholds: readonly number[];
+  victory: { totalPoints: number; crowns: number; pointsInOneColor: number };
+  maxTokens: number;
+  maxReserved: number;
 }
 
 /** Carte achetée : `color` est la couleur effective du bonus (joker résolu), `null` sans bonus. */

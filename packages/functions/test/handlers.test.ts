@@ -1,8 +1,16 @@
 import { getApps, initializeApp } from 'firebase-admin/app';
 import { getFirestore } from 'firebase-admin/firestore';
 import type { Firestore, Timestamp } from 'firebase-admin/firestore';
-import { CARDS, getLegalMoves, LEVELS, toPlayerView, TURN_TIMEOUT_MS } from '@gld/engine';
-import type { GameDoc, GameState, Move, PublicState, SecretState, Seat } from '@gld/engine';
+import { getCard, getLegalMoves, LEVELS, toPlayerView, TURN_TIMEOUT_MS } from '@gld/engine';
+import type {
+  GameDoc,
+  GameState,
+  GemColor,
+  Move,
+  PublicState,
+  SecretState,
+  Seat,
+} from '@gld/engine';
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest';
 import { cleanupGames } from '../src/cleanup.js';
 import { STALE_GAME_MS, WAITING_ROOM_TTL_MS } from '../src/config.js';
@@ -269,18 +277,16 @@ describe('coups', () => {
 
   it('clôt la partie à la victoire : statistiques, historique, code libéré', async () => {
     const { gameId, code, active, waiting } = await startedGame();
-    // Prépare une victoire : le joueur actif possède déjà 20 Renommée.
+    // Prépare une victoire : le joueur actif possède déjà 21 Renommée (cartes de data/cards.json :
+    // trois « lady » à 4 points, L3-13 à 6 points sans bonus, carte Royale R-3 à 3 points).
     const game = await gameDoc(gameId);
     const seat = game.state!.current;
-    const winners = CARDS.filter((c) => c.level === 3 && c.bonus !== null && c.bonus !== 'joker');
     const pub = structuredClone(game.state!);
-    pub.players[seat].cards = [
-      winners.find((c) => c.bonus === 'white' && c.points === 5)!,
-      winners.find((c) => c.bonus === 'green' && c.points === 5)!,
-      winners.find((c) => c.bonus === 'black' && c.points === 5)!,
-      winners.find((c) => c.bonus === 'blue' && c.crowns === 2)!,
-    ].map((c) => ({ id: c.id, color: c.bonus as 'white' }));
-    pub.players[seat].royals = ['E1'];
+    pub.players[seat].cards = ['L3-06', 'L3-07', 'L3-08', 'L3-13'].map((id) => ({
+      id,
+      color: getCard(id).bonus as GemColor | null,
+    }));
+    pub.players[seat].royals = ['R-3'];
     const sec = await secretDoc(gameId);
     for (const level of LEVELS) {
       const owned = new Set(pub.players[seat].cards.map((c) => c.id));
@@ -305,7 +311,7 @@ describe('coups', () => {
     expect((await userDoc(waiting))?.stats).toEqual({ played: 1, wins: 0, losses: 1, abandons: 0 });
     expect((await userDoc(active))?.currentGameId).toBeNull();
     const history = (await db.doc(`users/${active}/history/${gameId}`).get()).data();
-    expect(history).toMatchObject({ result: 'win', reason: 'points', myPoints: 22 });
+    expect(history).toMatchObject({ result: 'win', reason: 'points', myPoints: 21 });
     expect((await db.collection('roomCodes').doc(code).get()).exists).toBe(false);
     await expectReason(
       submitMove(db, ctx(waiting), { gameId, move, expectedVersion: 2, moveId: moveId() }),

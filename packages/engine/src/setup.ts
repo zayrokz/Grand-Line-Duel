@@ -1,19 +1,15 @@
-import { PYRAMID_SIZE, cardsOfLevel } from './cards.js';
+import { PYRAMID_SIZE, ROYALS, RULES, cardsOfLevel } from './cards.js';
 import { CELL_COUNT, placeOnBoard } from './board.js';
 import { emptyTokens, TOTAL_PRIVILEGES } from './player.js';
 import { nextRandom, shuffle } from './rng.js';
 import type { RngState } from './rng.js';
-import { GEM_COLORS, LEVELS } from './types.js';
+import { LEVELS, TOKEN_COLORS } from './types.js';
 import type { GameState, Level, PlayerState, Seat, TokenColor } from './types.js';
 
-export const INITIAL_TOKENS: readonly TokenColor[] = [
-  ...GEM_COLORS.flatMap((color) => [color, color, color, color]),
-  'pearl',
-  'pearl',
-  'gold',
-  'gold',
-  'gold',
-];
+/** Les jetons de la boîte, d'après `meta.tokens` (25 au total, validé au chargement). */
+export const INITIAL_TOKENS: readonly TokenColor[] = TOKEN_COLORS.flatMap((color) =>
+  Array.from({ length: RULES.tokens[color] }, () => color),
+);
 
 function newPlayer(): PlayerState {
   return { tokens: emptyTokens(), privileges: 0, cards: [], royals: [], reservedLevels: [] };
@@ -68,7 +64,7 @@ export function createGame(seed: string, first?: Seat): GameState {
       privileges: TOTAL_PRIVILEGES - 1,
       pyramid,
       deckCounts: { 1: decks[1].length, 2: decks[2].length, 3: decks[3].length },
-      royals: ['E1', 'E2', 'E3', 'E4'],
+      royals: ROYALS.map((r) => r.id),
       players,
       winner: null,
       winReason: null,

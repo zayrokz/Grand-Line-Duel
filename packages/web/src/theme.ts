@@ -6,15 +6,15 @@
  * Remplacer une illustration :
  * - ressources : remplacez les SVG de `src/assets/tokens/` (même nom de fichier) ;
  * - cartes : déposez `src/assets/cards/<id>.(webp|png|jpg|svg)` (ex. `L1-07.webp`) ;
- * - cartes Empereur : `src/assets/royals/<id>.(webp|png|jpg|svg)` (ex. `E2.webp`) ;
- * sinon le placeholder (emoji défini dans `cards.json`) est utilisé.
+ * - cartes Empereur : `src/assets/royals/<id>.(webp|png|jpg|svg)` (ex. `R-2.webp`) ;
+ * sinon le placeholder (emoji défini ci-dessous par famille ou par carte) est utilisé.
  */
 import type {
   AvatarId,
   CardAbility,
-  CardKind,
+  CardDef,
   GemColor,
-  RoyalAbility,
+  RoyalDef,
   TokenColor,
   WinReason,
 } from '@gld/engine';
@@ -109,44 +109,108 @@ export const ICONS = {
   cardBack,
 };
 
+export type CardKind = 'crew' | 'ship' | 'gear';
+
 export const CARD_KINDS: Record<CardKind, string> = {
   crew: 'Équipage',
   ship: 'Navire',
   gear: 'Équipement',
 };
 
-export const ABILITIES: Record<
-  CardAbility | 'joker',
-  { label: string; icon: string; help: string }
-> = {
-  extraTurn: { label: 'Rejouer', icon: '🔁', help: 'Jouez immédiatement un nouveau tour.' },
-  token: {
-    label: 'Ravitaillement',
-    icon: '➕',
-    help: 'Prenez sur le plateau 1 jeton de la couleur du bonus de la carte.',
-  },
-  privilege: {
-    label: 'Log Pose',
-    icon: '🧭',
-    help: 'Prenez 1 Log Pose (à l’adversaire s’il n’en reste plus).',
-  },
-  steal: {
-    label: 'Abordage',
-    icon: '🏴‍☠️',
-    help: 'Volez 1 ressource (jamais de Berry) à l’adversaire.',
-  },
-  joker: {
+/** Habillage des capacités (identifiants du fichier de données). */
+export const ABILITIES: Record<CardAbility, { label: string; icon: string; help: string }> = {
+  extra_turn: { label: 'Rejouer', icon: '🔁', help: 'Jouez immédiatement un nouveau tour.' },
+  associate: {
     label: 'Polyvalent',
     icon: '🃏',
     help: 'Le bonus prend la couleur d’une de vos cartes à bonus (au choix).',
   },
+  take_token: {
+    label: 'Ravitaillement',
+    icon: '➕',
+    help: 'Prenez sur le plateau 1 jeton de la couleur du bonus de la carte.',
+  },
+  take_privilege: {
+    label: 'Log Pose',
+    icon: '🧭',
+    help: 'Prenez 1 Log Pose (à l’adversaire s’il n’en reste plus).',
+  },
+  steal_token: {
+    label: 'Abordage',
+    icon: '🏴‍☠️',
+    help: 'Volez 1 ressource (jamais de Berry) à l’adversaire.',
+  },
 };
 
-export const ROYAL_ABILITIES: Record<RoyalAbility, string> = {
-  extraTurn: ABILITIES.extraTurn.help,
-  privilege: ABILITIES.privilege.help,
-  steal: ABILITIES.steal.help,
+/**
+ * Habillage des familles de cartes (champ `family` de data/cards.json). Les données de jeu ne
+ * contiennent ni nom ni illustration : tout l'habillage est ici.
+ */
+export const FAMILIES: Record<string, { name: string; kind: CardKind; art: string }> = {
+  earring: { name: 'Mousse', kind: 'crew', art: '🧒' },
+  sword: { name: 'Sabre', kind: 'gear', art: '🗡️' },
+  diadem: { name: 'Pavillon', kind: 'gear', art: '🚩' },
+  gem: { name: 'Ravitailleur', kind: 'crew', art: '🧺' },
+  necklace: { name: 'Chaloupe rapide', kind: 'ship', art: '🚣' },
+  double: { name: 'Navire marchand', kind: 'ship', art: '🚢' },
+  signet: { name: 'Navigateur', kind: 'crew', art: '🧭' },
+  glove: { name: 'Abordeur', kind: 'crew', art: '🪝' },
+  tiara: { name: 'Officier', kind: 'crew', art: '🎖️' },
+  crown: { name: 'Capitaine', kind: 'crew', art: '🎩' },
+  lady: { name: 'Galion', kind: 'ship', art: '🛳️' },
+  joker: { name: 'Matelot polyvalent', kind: 'crew', art: '🃏' },
+  points: { name: 'Trésor', kind: 'gear', art: '💰' },
 };
+
+/** Complément de nom selon la couleur du bonus (« Sabre de la taverne »). */
+export const COLOR_EPITHETS: Record<GemColor, string> = {
+  white: 'de la cambuse',
+  blue: 'des cartographes',
+  green: 'du chantier naval',
+  red: 'de la taverne',
+  black: 'de la sainte-barbe',
+};
+
+/** Noms propres des cartes sans couleur fixe (jokers, trésors), par identifiant. */
+export const CARD_NAMES: Record<string, { name: string; art?: string; kind?: CardKind }> = {
+  'L1-26': { name: 'Matelot polyvalent', art: '🧑‍🔧' },
+  'L1-27': { name: 'Perroquet bavard', art: '🦜' },
+  'L1-28': { name: 'Bouteille à la mer', art: '🍾', kind: 'gear' },
+  'L1-29': { name: 'Mascotte du navire', art: '🐒' },
+  'L1-30': { name: 'Bourse de doublons', art: '💰', kind: 'gear' },
+  'L2-21': { name: 'Timonier aguerri', art: '☸️' },
+  'L2-22': { name: 'Pavillon noir', art: '🏴‍☠️', kind: 'gear' },
+  'L2-23': { name: 'Carte au trésor déchirée', art: '🗺️', kind: 'gear' },
+  'L2-24': { name: 'Coffre au trésor', art: '🧰', kind: 'gear' },
+  'L3-11': { name: 'Vaisseau fantôme', art: '👻', kind: 'ship' },
+  'L3-12': { name: 'Vent providentiel', art: '🌬️', kind: 'gear' },
+  'L3-13': { name: 'Trident des tempêtes', art: '🔱', kind: 'gear' },
+};
+
+/** Nom, type et illustration (placeholder) d'une carte. */
+export function cardTheme(card: CardDef): { name: string; kind: CardKind; art: string } {
+  const family = FAMILIES[card.family] ?? { name: 'Carte', kind: 'gear', art: '🏴‍☠️' };
+  const named = CARD_NAMES[card.id];
+  const colored = card.bonus !== null && card.bonus !== 'joker';
+  const name =
+    named?.name ??
+    (colored
+      ? `${family.name} ${COLOR_EPITHETS[card.bonus as GemColor]}`
+      : `${family.name} (${card.id})`);
+  return { name, kind: named?.kind ?? family.kind, art: named?.art ?? family.art };
+}
+
+/** Habillage des cartes Royales (« cartes Empereur »), par identifiant. */
+export const ROYAL_THEME: Record<string, { name: string; art: string }> = {
+  'R-1': { name: 'Impératrice des Abysses', art: '🐙' },
+  'R-2': { name: 'Empereur des Brumes', art: '🌫️' },
+  'R-3': { name: 'Empereur de la Tempête', art: '🌪️' },
+  'R-4': { name: 'Impératrice des Marées', art: '🌊' },
+};
+
+export function royalTheme(royal: RoyalDef): { name: string; art: string } {
+  return ROYAL_THEME[royal.id] ?? { name: `Empereur ${royal.id}`, art: '👑' };
+}
 
 export const LEVEL_THEME: Record<1 | 2 | 3, { name: string; color: string }> = {
   1: { name: 'Mers calmes', color: '#3f8a4a' },

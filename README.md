@@ -5,9 +5,10 @@ Space Cowboys), revisitée dans un univers de pirates original. Deux joueurs s'a
 chacun sur son appareil (PC ou téléphone) : le premier à remplir une condition de « Le Trésor »
 (20 Renommée, 10 Primes ou 10 Renommée d'une même couleur) l'emporte.
 
-> ⚠️ **Données de cartes de substitution.** `packages/engine/data/cards.json` est un jeu de données
-> **généré et équilibré, non officiel** (quantités et mécaniques respectées : 30/24/13 cartes,
-> 4 cartes Empereur). Remplacez-le par la liste exacte si vous la possédez (voir plus bas).
+> **Données de jeu.** `packages/engine/data/cards.json` est la **source de vérité** : 67 cartes
+> Joaillerie, 4 cartes Royales, quantités de jetons, taille de la pyramide, seuils de Couronnes et
+> de victoire, limites de jetons et de réservations. Il est utilisé tel quel et validé par Zod au
+> chargement (voir plus bas).
 >
 > Aucune image, aucun logo ni nom de personnage officiel de One Piece ou de Splendor n'est utilisé :
 > toutes les illustrations sont des SVG originaux ou des emojis, centralisés et remplaçables.
@@ -172,51 +173,45 @@ App Check. Seule la clé du compte de service est secrète. Aucun secret n'est p
 
 ### Habillage
 
-| Quoi                                        | Où                                                                                      |
-| ------------------------------------------- | --------------------------------------------------------------------------------------- |
-| Noms, couleurs, icônes des ressources       | `packages/web/src/theme.ts` (`RESOURCES`)                                               |
-| Vocabulaire (Log Pose, Primes, Renommée…)   | `packages/web/src/theme.ts` (`TERMS`, `ABILITIES`…)                                     |
-| Couleurs de l'interface, typographies       | `packages/web/src/theme.css`                                                            |
-| Icônes des jetons                           | `packages/web/src/assets/tokens/<couleur>.svg`                                          |
-| Log Pose, Prime, Trésor, logo, dos de carte | `packages/web/src/assets/*.svg`                                                         |
-| Illustration d'une carte                    | déposer `packages/web/src/assets/cards/<id>.webp` (ou png, jpg, svg) — ex. `L2-07.webp` |
-| Illustration d'une carte Empereur           | `packages/web/src/assets/royals/E1.webp` … `E4.webp`                                    |
-| Icônes PWA / favicon                        | `packages/web/public/` (`favicon.svg`, `icons/*.png`)                                   |
+| Quoi                                        | Où                                                                                       |
+| ------------------------------------------- | ---------------------------------------------------------------------------------------- |
+| Noms, couleurs, icônes des ressources       | `packages/web/src/theme.ts` (`RESOURCES`)                                                |
+| Vocabulaire (Log Pose, Primes, Renommée…)   | `packages/web/src/theme.ts` (`TERMS`, `ABILITIES`…)                                      |
+| Couleurs de l'interface, typographies       | `packages/web/src/theme.css`                                                             |
+| Icônes des jetons                           | `packages/web/src/assets/tokens/<couleur>.svg`                                           |
+| Log Pose, Prime, Trésor, logo, dos de carte | `packages/web/src/assets/*.svg`                                                          |
+| Illustration d'une carte                    | déposer `packages/web/src/assets/cards/<id>.webp` (ou png, jpg, svg) — ex. `L2-07.webp`  |
+| Illustration d'une carte Empereur           | `packages/web/src/assets/royals/R-1.webp` … `R-4.webp`                                   |
+| Nom, type et emoji des cartes               | `packages/web/src/theme.ts` (`FAMILIES` + `COLOR_EPITHETS`, `CARD_NAMES`, `ROYAL_THEME`) |
+| Icônes PWA / favicon                        | `packages/web/public/` (`favicon.svg`, `icons/*.png`)                                    |
 
 Une image déposée remplace automatiquement le placeholder (emoji) de la carte, sans autre
 modification. N'utilisez que des illustrations dont vous détenez les droits.
 
-### Données de cartes
+### Données de jeu (`cards.json`)
 
-`packages/engine/data/cards.json` est validé au chargement par Zod (`packages/engine/src/schema.ts`) :
-un fichier incohérent fait échouer le serveur, le client et les tests avec un message explicite.
-Les couleurs internes reprennent celles du jeu original (`white`, `blue`, `green`, `red`, `black`,
-`pearl`) pour faciliter la saisie de la liste exacte :
+`packages/engine/data/cards.json` est utilisé **tel quel** comme source de vérité et validé au
+chargement par Zod (`packages/engine/src/schema.ts`) : un fichier incohérent fait échouer le
+serveur, le client et les tests avec un message explicite. Il est exclu de Prettier pour rester
+identique au fichier fourni.
 
-```jsonc
-{
-  "id": "L2-07", // L<niveau>-<numéro à 2 chiffres>, unique
-  "level": 2, // 1, 2 ou 3 (30 / 24 / 13 cartes exigées)
-  "name": "Navigatrice",
-  "kind": "crew", // crew (Équipage), ship (Navire), gear (Équipement)
-  "art": "🧭", // placeholder affiché sans image
-  "bonus": "blue", // couleur, "joker" ou null (aucun bonus)
-  "bonusCount": 1, // 0 si bonus null, 1 pour un joker, 1 ou 2 sinon
-  "points": 2, // Renommée
-  "crowns": 1, // Primes
-  "ability": "privilege", // extraTurn | token | privilege | steal | null
-  "cost": { "white": 2, "red": 3, "pearl": 1 }, // jamais d'Or
-}
-```
+- **`meta`** : `tokens` (quantités par couleur, 25 au total pour le plateau 5×5), `privileges`,
+  `pyramid` (cartes visibles par niveau), `royalThresholds` (Couronnes donnant une carte Royale),
+  `victory` (`totalPoints`, `crowns`, `pointsInOneColor`), `maxTokens`, `maxReserved`, `colors`.
+  Le moteur lit ces valeurs (`RULES`, `MAX_TOKENS`, `WIN_POINTS`…) ; rien n'est codé en dur.
+- **`cards`** : `id`, `level`, `family`, `bonus` (couleur, `"joker"` ou `null`), `bonusCount`,
+  `points`, `crowns`, `abilities` (liste ordonnée parmi `extra_turn`, `associate`, `take_token`,
+  `take_privilege`, `steal_token`), `cost` (un coût absent vaut 0, jamais d'Or).
+- **`royals`** : `id`, `points`, `abilities` (`extra_turn`, `take_privilege`, `steal_token`).
 
-Les 4 cartes Empereur se trouvent dans `royals` (`id` `E1`…`E4`, `points`, `ability` parmi
-`extraTurn | privilege | steal | null`). Après remplacement :
+Contrôles effectués : 30 / 24 / 13 cartes et 4 cartes Royales, identifiants uniques, `bonus: null`
+⇔ `bonusCount: 0`, bonus `"joker"` ⇔ capacité `associate`, `take_token` seulement sur une carte de
+couleur, 25 jetons, seuils strictement croissants, champs inconnus refusés.
 
-1. passez `"placeholder"` à `false` et mettez à jour `$comment` ;
-2. lancez `npm test` (les tests de scénarios sélectionnent les cartes par propriétés : ajustez-les
-   si votre liste ne contient plus de carte correspondante) ;
-3. redéployez (les parties en cours conservent leurs identifiants de cartes : évitez de renuméroter
-   pendant que des parties sont actives).
+Les données ne contiennent volontairement ni nom ni illustration : l'habillage pirate est dans
+`packages/web/src/theme.ts` (nom par famille + couleur du bonus, noms propres des jokers et des
+cartes à points, noms des cartes Royales). Après une modification de `cards.json`, lancez
+`npm test` et redéployez ; évitez de renuméroter des cartes pendant que des parties sont en cours.
 
 ## Règles, sécurité et suivi
 

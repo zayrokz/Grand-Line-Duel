@@ -20,7 +20,8 @@ Fichier de suivi pour reprendre le travail d'une session à l'autre.
 - Document d'architecture et modèle de données.
 - Moteur `@gld/engine` : types, données validées par Zod, PRNG à graine, plateau/spirale,
   `validateMove`, `getLegalMoves`, `applyMove`, `forfeit`, vues joueur, schéma des coups.
-- Données de cartes **de substitution** (`packages/engine/data/cards.json`, `placeholder: true`).
+- Données de jeu officielles fournies (`packages/engine/data/cards.json`), utilisées telles quelles
+  comme source de vérité et validées par Zod (cartes, cartes Royales, `meta`).
 - Tests moteur : données, plateau, mise en place, jetons, Log Pose, remplissage, réservation, achat,
   capacités, Primes/cartes Empereur, défausse, victoires, abandon, 40 parties aléatoires complètes
   avec invariants (25 jetons, 3 Log Pose, 67 cartes, 4 Empereurs, aucun secret dans l'état public).
@@ -67,7 +68,6 @@ Fichier de suivi pour reprendre le travail d'une session à l'autre.
 - Créer le projet Firebase (plan Blaze), activer Auth (Anonyme, Google, e-mail), App Check
   (reCAPTCHA Enterprise) et l'**appliquer à Firestore** dans la console ; renseigner les variables
   et le secret GitHub (voir README).
-- Remplacer `packages/engine/data/cards.json` par la liste officielle si disponible.
 - Remplacer les placeholders visuels (emojis des cartes) par des illustrations originales.
 
 ## Pistes (non demandées, non implémentées)
@@ -114,7 +114,7 @@ Fichier de suivi pour reprendre le travail d'une session à l'autre.
 
 - **Sélection liée à la version** : l'état local de sélection (jetons, mode Log Pose…) est indexé
   par `game.version` et se réinitialise à chaque coup, sans `setState` dans un effet.
-- **Barre d'action collante** (`position: sticky`) : elle ne masque jamais le plateau, même quand une
+- **Barre d'action collante** (`position: sticky`) : elle occupe sa place dans la page : en faisant défiler, le plateau reste toujours accessible, même quand une
   décision (défausse, cartes Empereur) l'agrandit.
 
 ### Interprétations de règles (ambiguïtés signalées)
@@ -146,9 +146,19 @@ Fichier de suivi pour reprendre le travail d'une session à l'autre.
 10. **Composition du sac** : déductible (25 − plateau − jetons des joueurs, tous publics), comme
     dans le jeu physique ; seul l'ordre de tirage (graine) est secret.
 
-### Données de cartes
+### Données de jeu
 
-- `cards.json` est un **jeu de données généré et équilibré, non officiel** : 30/24/13 cartes,
-  4 cartes Empereur (3 Renommée ; 2 + vol ; 2 + Log Pose ; 2 + rejouer). Environ 16 Renommée par
-  couleur, 10 cartes joker, 39 Primes au total, 2 cartes sans bonus et 5 cartes à double bonus
-  (niveau 2). À remplacer par la liste exacte si disponible (voir README).
+- `packages/engine/data/cards.json` (fourni) est la **source de vérité**, utilisé tel quel (exclu de
+  Prettier) et validé par Zod au chargement : 67 cartes, 4 cartes Royales et `meta` (jetons,
+  Privilèges, pyramide, seuils de Couronnes, victoire, limites). Toutes les constantes du moteur en
+  découlent (`RULES`, `MAX_TOKENS`, `WIN_*`, `CROWN_THRESHOLDS`, `PYRAMID_SIZE`, `INITIAL_TOKENS`).
+- **Capacités multiples** : `abilities` est une liste appliquée dans l'ordre du fichier (L3-12 :
+  association puis rejouer). Les capacités d'une carte Royale passent avant le reste de la file.
+- **Identifiants repris tels quels** : capacités `extra_turn`, `associate`, `take_token`,
+  `take_privilege`, `steal_token` ; cartes Royales `R-1` … `R-4`.
+- **Carte joker** : reconnue par la capacité `associate` (le schéma impose qu'elle aille de pair avec
+  `bonus: "joker"`).
+- **Habillage séparé des données** : noms, types (Équipage/Navire/Équipement) et emojis dérivés de
+  `family` et de la couleur du bonus dans `packages/web/src/theme.ts`, avec repli générique si une
+  famille inconnue apparaît.
+- Le jeu de données de substitution initial a été remplacé (aucune partie déployée à migrer).

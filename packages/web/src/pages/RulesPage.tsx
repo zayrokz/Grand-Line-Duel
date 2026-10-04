@@ -1,10 +1,29 @@
 import { Link } from 'react-router-dom';
-import { ABILITIES, RESOURCES, TERMS } from '../theme';
+import {
+  CARD_ABILITIES,
+  CARDS,
+  CROWN_THRESHOLDS,
+  GEM_COLORS,
+  MAX_RESERVED,
+  MAX_TOKENS,
+  PYRAMID_SIZE,
+  ROYALS,
+  RULES,
+  TOTAL_PRIVILEGES,
+  TURN_TIMEOUT_MS,
+  WIN_COLOR_POINTS,
+  WIN_CROWNS,
+  WIN_POINTS,
+} from '@gld/engine';
 import { TokenIcon } from '../components/Token';
-import { GEM_COLORS } from '@gld/engine';
+import { ABILITIES, RESOURCES, TERMS } from '../theme';
 
-/** Résumé des règles (mécaniques de Splendor Duel, habillage pirate). */
+const ordinal = (n: number) => (n === 1 ? '1re' : `${n}e`);
+
+/** Résumé des règles (mécaniques de Splendor Duel, habillage pirate). Valeurs issues des données. */
 export function RulesPage() {
+  const gemCounts = new Set(GEM_COLORS.map((c) => RULES.tokens[c]));
+  const sameGemCount = gemCounts.size === 1 ? RULES.tokens.white : null;
   return (
     <article className="panel rules">
       <h1>Règles de Grand Line Duel</h1>
@@ -20,18 +39,22 @@ export function RulesPage() {
           {GEM_COLORS.map((c) => (
             <span key={c} className="rule-token">
               <TokenIcon color={c} size={20} decorative /> {RESOURCES[c].plural}
+              {sameGemCount === null && ` (${RULES.tokens[c]})`}
             </span>
-          ))}{' '}
-          (4 de chaque), <TokenIcon color="pearl" size={20} decorative /> 2 {RESOURCES.pearl.plural}{' '}
-          (ressource rare) et <TokenIcon color="gold" size={20} decorative /> 3{' '}
+          ))}
+          {sameGemCount !== null && ` (${sameGemCount} de chaque)`},{' '}
+          <TokenIcon color="pearl" size={20} decorative /> {RULES.tokens.pearl}{' '}
+          {RESOURCES.pearl.plural} (ressource rare) et{' '}
+          <TokenIcon color="gold" size={20} decorative /> {RULES.tokens.gold}{' '}
           {RESOURCES.gold.plural} (joker).
         </li>
         <li>
-          3 {TERMS.privileges}, 4 {TERMS.royals}, et la carte « {TERMS.victoryCard} ».
+          {TOTAL_PRIVILEGES} {TERMS.privileges}, {ROYALS.length} {TERMS.royals}, et la carte «{' '}
+          {TERMS.victoryCard} ».
         </li>
         <li>
-          67 cartes en 3 niveaux, disposées en pyramide : 3 cartes de niveau 3, 4 de niveau 2, 5 de
-          niveau 1.
+          {CARDS.length} cartes en 3 niveaux, disposées en pyramide : {PYRAMID_SIZE[3]} cartes de
+          niveau 3, {PYRAMID_SIZE[2]} de niveau 2, {PYRAMID_SIZE[1]} de niveau 1.
         </li>
       </ul>
 
@@ -59,8 +82,8 @@ export function RulesPage() {
         </li>
         <li>
           <strong>Réserver une carte</strong> : prends 1 {RESOURCES.gold.name} et une carte de la
-          pyramide (ou le dessus d’un paquet). 3 cartes réservées au maximum, cachées à ton
-          adversaire.
+          pyramide (ou le dessus d’un paquet). {MAX_RESERVED} cartes réservées au maximum, cachées à
+          ton adversaire.
         </li>
         <li>
           <strong>Recruter une carte</strong> de la pyramide ou de ta réserve : paie son coût,
@@ -71,7 +94,7 @@ export function RulesPage() {
 
       <h2>Capacités</h2>
       <ul>
-        {(['extraTurn', 'joker', 'token', 'privilege', 'steal'] as const).map((key) => (
+        {CARD_ABILITIES.map((key) => (
           <li key={key}>
             {ABILITIES[key].icon} <strong>{ABILITIES[key].label}</strong> : {ABILITIES[key].help}
           </li>
@@ -80,31 +103,40 @@ export function RulesPage() {
 
       <h2>{TERMS.crowns}</h2>
       <p>
-        À ta 3<sup>e</sup> puis à ta 6<sup>e</sup> {TERMS.crown}, choisis une {TERMS.royal}{' '}
-        disponible et applique sa capacité (ce n’est pas une action).
+        {CROWN_THRESHOLDS.map((threshold, i) => (
+          <span key={threshold}>
+            {i === 0 ? 'À ta ' : ' puis à ta '}
+            {ordinal(threshold)} {TERMS.crown}
+          </span>
+        ))}
+        , choisis une {TERMS.royal} disponible et applique sa capacité (ce n’est pas une action).
       </p>
 
       <h2>Fin du tour</h2>
       <p>
-        Plus de 10 jetons ? Remets dans le sac ceux de ton choix pour revenir à 10. Puis on vérifie
-        la victoire.
+        Plus de {MAX_TOKENS} jetons ? Remets dans le sac ceux de ton choix pour revenir à{' '}
+        {MAX_TOKENS}. Puis on vérifie la victoire.
       </p>
 
       <h2>{TERMS.victoryCard} : conditions de victoire</h2>
       <p>La partie s’arrête à la fin du tour d’un joueur qui atteint :</p>
       <ul>
         <li>
-          20 points de {TERMS.points} (cartes et {TERMS.royals}) ;
+          {WIN_POINTS} points de {TERMS.points} (cartes et {TERMS.royals}) ;
         </li>
-        <li>ou 10 {TERMS.crowns} ;</li>
-        <li>ou 10 points de {TERMS.points} dans une même couleur de bonus.</li>
+        <li>
+          ou {WIN_CROWNS} {TERMS.crowns} ;
+        </li>
+        <li>
+          ou {WIN_COLOR_POINTS} points de {TERMS.points} dans une même couleur de bonus.
+        </li>
       </ul>
 
       <h2>En ligne</h2>
       <p>
-        Chaque tour dispose d’un délai de 5 minutes : au-delà, ton adversaire peut réclamer la
-        victoire. Tu peux recharger la page ou changer d’appareil (compte lié) sans perdre la
-        partie.
+        Chaque tour dispose d’un délai de {TURN_TIMEOUT_MS / 60000} minutes : au-delà, ton
+        adversaire peut réclamer la victoire. Tu peux recharger la page ou changer d’appareil
+        (compte lié) sans perdre la partie.
       </p>
       <p className="muted small">
         Adaptation non commerciale et non officielle des mécaniques de « Splendor Duel » (Marc André

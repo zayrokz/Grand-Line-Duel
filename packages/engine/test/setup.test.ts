@@ -42,8 +42,8 @@ describe('mise en place', () => {
     expect(t.pub.players[0].privileges).toBe(1);
   });
 
-  it('pose les 4 cartes Empereur', () => {
-    expect(s.pub.royals).toEqual(['E1', 'E2', 'E3', 'E4']);
+  it('pose les 4 cartes Royales (Empereurs)', () => {
+    expect(s.pub.royals).toEqual(['R-1', 'R-2', 'R-3', 'R-4']);
   });
 
   it('est déterministe pour une graine donnée et varie selon la graine', () => {

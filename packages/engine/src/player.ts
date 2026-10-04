@@ -1,4 +1,4 @@
-import { getCard, getRoyal } from './cards.js';
+import { getCard, getRoyal, isJoker, RULES } from './cards.js';
 import { GEM_COLORS, TOKEN_COLORS } from './types.js';
 import type {
   CardDef,
@@ -9,13 +9,14 @@ import type {
   TokenCounts,
 } from './types.js';
 
-export const MAX_TOKENS = 10;
-export const MAX_RESERVED = 3;
-export const TOTAL_PRIVILEGES = 3;
-export const CROWN_THRESHOLDS: readonly number[] = [3, 6];
-export const WIN_POINTS = 20;
-export const WIN_CROWNS = 10;
-export const WIN_COLOR_POINTS = 10;
+// Seuils et limites : issus de `meta` dans data/cards.json.
+export const MAX_TOKENS = RULES.maxTokens;
+export const MAX_RESERVED = RULES.maxReserved;
+export const TOTAL_PRIVILEGES = RULES.privileges;
+export const CROWN_THRESHOLDS: readonly number[] = RULES.royalThresholds;
+export const WIN_POINTS = RULES.victory.totalPoints;
+export const WIN_CROWNS = RULES.victory.crowns;
+export const WIN_COLOR_POINTS = RULES.victory.pointsInOneColor;
 
 export function emptyTokens(): TokenCounts {
   return { white: 0, blue: 0, green: 0, red: 0, black: 0, pearl: 0, gold: 0 };
@@ -97,7 +98,7 @@ export function computePayment(card: CardDef, player: PlayerState): Partial<Toke
 
 /** Une carte joker ne peut être achetée que si l'on possède déjà une carte à bonus coloré. */
 export function canBuyCard(card: CardDef, player: PlayerState): boolean {
-  if (card.bonus === 'joker' && !hasColoredBonus(player)) return false;
+  if (isJoker(card) && !hasColoredBonus(player)) return false;
   return computePayment(card, player) !== null;
 }
 
