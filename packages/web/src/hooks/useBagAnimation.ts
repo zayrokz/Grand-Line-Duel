@@ -50,7 +50,7 @@ export function useBagAnimation(board: (TokenColor | null)[], bagCount: number) 
   useEffect(() => {
     if (!spill) return undefined;
     const timers: number[] = [];
-    const flyers: HTMLImageElement[] = [];
+    const flyers: HTMLElement[] = [];
     const animations: Animation[] = [];
     const land = (cell: number) => setLanded((set) => new Set(set).add(cell));
 
@@ -88,12 +88,17 @@ export function useBagAnimation(board: (TokenColor | null)[], bagCount: number) 
               y: to.top + to.height / 2 - size / 2,
             };
             const peak = { x: (start.x + end.x) / 2, y: Math.min(start.y, end.y) - 90 };
-            const img = document.createElement('img');
-            img.src = RESOURCES[color].icon;
-            img.alt = '';
-            img.className = 'flying-token';
+            // Même rendu que les jetons du plateau : disque en relief (voir .chip dans styles.css).
+            const img = document.createElement('span');
+            img.className = 'flying-token chip';
+            img.style.setProperty('--chip', RESOURCES[color].color);
+            img.style.setProperty('--size', `${size}px`);
             img.style.width = `${size}px`;
             img.style.height = `${size}px`;
+            const face = document.createElement('img');
+            face.src = RESOURCES[color].icon;
+            face.alt = '';
+            img.appendChild(face);
             document.body.appendChild(img);
             flyers.push(img);
             const animation = img.animate(

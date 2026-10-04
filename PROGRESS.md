@@ -68,6 +68,14 @@ Fichier de suivi pour reprendre le travail d'une session à l'autre.
 - Log Pose : utilisables depuis une sélection de jetons ou en touchant son compteur ; explication
   affichée quand ils ne sont pas utilisables.
 
+- Rendu « matériel réel » : jetons en relief (disques épais, tranche, reflet, ombre), plateau de
+  bois creusé vu sous un léger angle, cartes avec épaisseur et reflet qui se retournent en
+  apparaissant, paquets en piles d'épaisseur variable, Log Pose en jetons.
+- Plus aucune information calculée sur les joueurs (Renommée, Primes, totaux de jetons, bonus,
+  progression vers la victoire, aperçu du paiement, cartes « abordables » surlignées) : chaque
+  joueur voit son matériel comme sur une table (piles de jetons, cartes rangées en colonnes par
+  couleur avec seule la partie haute visible) et compte lui-même.
+
 ## En cours
 
 - Rien : toutes les phases sont terminées.
@@ -125,6 +133,10 @@ Fichier de suivi pour reprendre le travail d'une session à l'autre.
   par `game.version` et se réinitialise à chaque coup, sans `setState` dans un effet.
 - **Barre d'action collante** (`position: sticky`) : elle occupe sa place dans la page : en faisant défiler, le plateau reste toujours accessible, même quand une
   décision (défausse, cartes Empereur) l'agrandit.
+
+- **« C'est aux joueurs de compter »** : l'interface n'affiche plus aucun total ni aide au calcul ;
+  seule la légalité reste vérifiée (bouton « Recruter » refusé si la carte n'est pas payable,
+  validation serveur de chaque coup). Le résumé des scores n'apparaît qu'en fin de partie.
 
 ### Interprétations de règles (ambiguïtés signalées)
 

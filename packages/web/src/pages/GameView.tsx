@@ -14,6 +14,7 @@ import { PendingPanel } from '../components/PendingPanel';
 import { PlayerPanel } from '../components/PlayerPanel';
 import { Pyramid } from '../components/Pyramid';
 import { useToast } from '../components/Toast';
+import { LogPoseToken } from '../components/Token';
 import { Treasure } from '../components/Treasure';
 import { useBagAnimation } from '../hooks/useBagAnimation';
 import { useMoveSender } from '../hooks/useMoveSender';
@@ -167,10 +168,6 @@ export function GameView({ gameId, game, reserved, uid }: Props) {
           : `Aucune ressource à prendre avec un ${TERMS.privilege} (les ${RESOURCES.gold.plural} sont exclus).`;
   const canReplenish = legal.some((m) => m.type === 'replenish');
   const canPass = legal.some((m) => m.type === 'pass');
-  const buyable = useMemo(
-    () => new Set(legal.flatMap((m) => (m.type === 'buy' ? [m.cardId] : []))),
-    [legal],
-  );
 
   /* ---------- Délai de tour ---------- */
   const deadline = game.turnDeadline?.toMillis() ?? null;
@@ -220,7 +217,6 @@ export function GameView({ gameId, game, reserved, uid }: Props) {
         opponentName={oppName}
         legal={legal}
         me={me}
-        opponent={opp}
         busy={busy}
         send={play}
       />
@@ -253,7 +249,7 @@ export function GameView({ gameId, game, reserved, uid }: Props) {
         {canUsePrivileges && (
           <button className="secondary" onClick={() => startPrivileges(mode.cells)}>
             <img src={ICONS.privilege} alt="" className="inline-icon" /> Prendre avec{' '}
-            {TERMS.privilege} ({me.privileges})
+            {TERMS.privilege}
           </button>
         )}
         <button className="ghost" onClick={() => setMode(IDLE)}>
@@ -270,15 +266,15 @@ export function GameView({ gameId, game, reserved, uid }: Props) {
           disabled={mode.cells.length === 0 || busy}
           onClick={() => play({ type: 'usePrivileges', cells: mode.cells })}
         >
-          Prendre {mode.cells.length}/{me.privileges} avec {TERMS.privilege}
+          Prendre {mode.cells.length} jeton{mode.cells.length > 1 ? 's' : ''} avec {TERMS.privilege}
         </button>
         <button className="ghost" onClick={() => setMode(IDLE)}>
           Annuler
         </button>
         <p className="hint">
-          Choisis jusqu’à {me.privileges} jeton{me.privileges > 1 ? 's' : ''}, n’importe où sur le
-          plateau (sauf {RESOURCES.gold.plural}). Ensuite, ton tour continue : tu fais encore ton
-          action principale. Les {TERMS.privileges} non dépensés sont conservés.
+          Un jeton par {TERMS.privilege} dépensé, n’importe où sur le plateau (sauf{' '}
+          {RESOURCES.gold.plural}). Ensuite, ton tour continue : tu fais encore ton action
+          principale. Les {TERMS.privileges} non dépensés sont conservés.
         </p>
       </div>
     );
@@ -300,8 +296,7 @@ export function GameView({ gameId, game, reserved, uid }: Props) {
         </p>
         {canUsePrivileges && (
           <button className="secondary" onClick={() => startPrivileges()}>
-            <img src={ICONS.privilege} alt="" className="inline-icon" /> Utiliser {TERMS.privilege}{' '}
-            ({me.privileges})
+            <img src={ICONS.privilege} alt="" className="inline-icon" /> Utiliser {TERMS.privilege}
           </button>
         )}
         {canPass && (
@@ -352,16 +347,27 @@ export function GameView({ gameId, game, reserved, uid }: Props) {
         </div>
 
         <div className="area-market">
-          <Treasure player={me} />
+          <Treasure />
           <div className="royals" aria-label={`${TERMS.royals} disponibles`}>
             {pub.royals.map((id) => (
               <RoyalView key={id} royalId={id} size="sm" />
             ))}
           </div>
           <div className="supply">
-            <span title={`${TERMS.privileges} en réserve (pas encore attribués aux joueurs)`}>
-              Réserve : <img src={ICONS.privilege} alt={TERMS.privileges} className="inline-icon" />{' '}
-              ×{pub.privileges}
+            <span
+              className="supply-logpose"
+              title={`${TERMS.privileges} en réserve (pas encore attribués aux joueurs)`}
+            >
+              Réserve :{' '}
+              <span
+                className="logpose-row"
+                role="img"
+                aria-label={`${pub.privileges} ${TERMS.privileges}`}
+              >
+                {Array.from({ length: pub.privileges }, (_, i) => (
+                  <LogPoseToken key={i} />
+                ))}
+              </span>
             </span>
           </div>
         </div>
@@ -369,7 +375,6 @@ export function GameView({ gameId, game, reserved, uid }: Props) {
         <div className="area-pyramid">
           <Pyramid
             pub={pub}
-            highlight={mainPhase ? buyable : undefined}
             onCard={(cardId) => setSheet({ kind: 'card', cardId })}
             onDeck={(level) => setSheet({ kind: 'deck', level })}
           />
