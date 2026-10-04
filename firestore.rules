@@ -1,0 +1,48 @@
+rules_version = '2';
+
+// Grand Line Duel — règles de sécurité Firestore.
+// Principe : refus par défaut. Le client ne fait QUE lire ; toutes les écritures passent par les
+// Cloud Functions (SDK Admin, qui contourne ces règles). Les données secrètes (paquets, sac,
+// graine, réserves adverses), les codes de salon et les compteurs de débit sont illisibles.
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function signedIn() {
+      return request.auth != null;
+    }
+
+    function isSelf(uid) {
+      return signedIn() && request.auth.uid == uid;
+    }
+
+    // Profil privé : pseudo, avatar, statistiques, partie en cours.
+    match /users/{uid} {
+      allow get: if isSelf(uid);
+      allow list, write: if false;
+
+      // Historique des parties du joueur (lecture et requêtes par le propriétaire uniquement).
+      match /history/{gameId} {
+        allow read: if isSelf(uid);
+        allow write: if false;
+      }
+    }
+
+    // Salon + état public de la partie : lisible par ses joueurs uniquement.
+    // `list` est autorisé pour les requêtes filtrées sur playerUids (array-contains).
+    match /games/{gameId} {
+      allow read: if signedIn() && request.auth.uid in resource.data.playerUids;
+      allow write: if false;
+
+      // Cartes réservées d'un joueur : lisibles par ce joueur uniquement.
+      match /private/{uid} {
+        allow get: if isSelf(uid);
+        allow list, write: if false;
+      }
+    }
+
+    // Tout le reste (gameSecrets, roomCodes, rateLimits…) : aucun accès client.
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

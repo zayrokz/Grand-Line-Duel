@@ -129,10 +129,12 @@ describe('ordre des tours et abandon', () => {
 
   it('l’abandon ou le dépassement du délai donne la victoire à l’adversaire', () => {
     const s = newGame();
-    const t = forfeit(s, 0, 'resign');
-    expect(t.pub.winner).toBe(1);
-    expect(t.pub.winReason).toBe('resign');
+    const t = forfeit(s.pub, 0, 'resign');
+    expect(t.winner).toBe(1);
+    expect(t.winReason).toBe('resign');
+    expect(t.log.at(-1)).toEqual({ t: 'end', winner: 1, reason: 'resign' });
+    expect(s.pub.winner).toBeNull(); // l'état d'origine n'est pas modifié
     expect(forfeit(t, 1, 'timeout')).toBe(t); // sans effet une fois la partie finie
-    expect(forfeit(s, 1, 'timeout').pub.winner).toBe(0);
+    expect(forfeit(s.pub, 1, 'timeout').winner).toBe(0);
   });
 });

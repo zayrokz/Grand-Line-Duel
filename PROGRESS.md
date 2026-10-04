@@ -8,8 +8,8 @@ Fichier de suivi pour reprendre le travail d'une session à l'autre.
 | --------------------------------------------------------------- | -------------------------------- |
 | 1. Architecture, modèle de données, arborescence, plan de tests | ✅ fait (`docs/ARCHITECTURE.md`) |
 | 2. Moteur de règles et tests                                    | ✅ fait (81 tests)               |
-| 3. Cloud Functions, règles Firestore, tests émulateur           | ⏳ en cours                      |
-| 4. Interface (accueil, profil, salon, plateau, fin de partie)   | à faire                          |
+| 3. Cloud Functions, règles Firestore, tests émulateur           | ✅ fait (26 tests émulateur)     |
+| 4. Interface (accueil, profil, salon, plateau, fin de partie)   | ⏳ en cours                      |
 | 5. CI/CD, PWA, en-têtes de sécurité, README                     | à faire                          |
 
 ## Fait
@@ -25,13 +25,24 @@ Fichier de suivi pour reprendre le travail d'une session à l'autre.
   capacités, Primes/cartes Empereur, défausse, victoires, abandon, 40 parties aléatoires complètes
   avec invariants (25 jetons, 3 Log Pose, 67 cartes, 4 Empereurs, aucun secret dans l'état public).
 
+- Contrat partagé client/serveur (`packages/engine/src/protocol.ts`) : documents Firestore,
+  codes d'erreur, validation du pseudo, des avatars, des codes de salon et des identifiants.
+- Cloud Functions (`packages/functions`) : `saveProfile`, `createRoom`, `joinRoom`, `leaveGame`,
+  `submitMove`, `claimTimeout`, `requestRematch`, `cleanupGames` (planifiée). App Check imposé hors
+  émulateur, CORS configurable (`ALLOWED_ORIGINS`), limitation de débit transactionnelle.
+- Build esbuild → `packages/functions/dist` (source déployée, `package.json` sans dépendance de
+  workspace). Vérifié de bout en bout dans l'émulateur Functions + Auth.
+- `firestore.rules` (deny by default), `firestore.indexes.json`, `firebase.json` (hosting avec
+  en-têtes de sécurité, functions, émulateurs).
+- Tests émulateur : 6 tests de règles + 20 tests de handlers.
+
 ## En cours
 
-- Cloud Functions et règles de sécurité.
+- Interface web.
 
 ## À faire
 
-- Phases 3 à 5.
+- Phases 4 et 5.
 
 ## Décisions prises
 
@@ -47,6 +58,19 @@ Fichier de suivi pour reprendre le travail d'une session à l'autre.
   périmée échoue proprement au lieu d'acheter une autre carte.
 - **Journal structuré** (`pub.log`, 300 entrées max) traduit en français par le client ; il ne
   contient jamais l'identité d'une carte réservée.
+
+- **Toutes les écritures Firestore via les Functions** : les règles n'autorisent que des lectures.
+- **Quota consommé même en cas de refus** (`runLimited`) : un script ne peut pas marteler des coups
+  illégaux ou deviner des codes de salon. Convention : un handler vérifie tout avant d'écrire.
+- **Idempotence** : `lastMove.id` ; un `moveId` rejoué renvoie la version déjà appliquée.
+  **Concurrence** : `expectedVersion` + transaction ; une version périmée renvoie `stale-version`.
+- **Une seule partie active par joueur** : créer/rejoindre est refusé pendant une partie en cours ;
+  rejoindre un autre salon annule son propre salon en attente.
+- **Délai de tour** : 5 minutes (`TURN_TIMEOUT_MS`) ; seul l'adversaire peut réclamer la victoire.
+  Le nettoyage horaire expire les salons en attente (> 6 h) et clôt les parties inactives (> 24 h
+  après le délai) par défaite du joueur actif.
+- **Statut `abandoned`** : abandon, dépassement du délai ou salon expiré/annulé ; `finished` :
+  victoire normale.
 
 ### Interprétations de règles (ambiguïtés signalées)
 

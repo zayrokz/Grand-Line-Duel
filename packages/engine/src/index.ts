@@ -8,3 +8,4 @@ export * from './setup.js';
 export * from './view.js';
 export { nextRandom, shuffle } from './rng.js';
 export { CardDataSchema, MoveSchema, parseMove } from './schema.js';
+export * from './protocol.js';

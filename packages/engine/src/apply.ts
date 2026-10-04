@@ -24,6 +24,7 @@ import type {
   LogEntry,
   Move,
   PlayerState,
+  PublicState,
   Seat,
   TakeableColor,
   WinReason,
@@ -316,13 +317,14 @@ export function applyMove(state: GameState, seat: Seat, move: Move): GameState {
 }
 
 /** Fin de partie par abandon ou dépassement du délai : l'adversaire du perdant gagne. */
-export function forfeit(state: GameState, loser: Seat, reason: 'resign' | 'timeout'): GameState {
-  if (state.pub.winner !== null) return state;
-  const s = structuredClone(state);
+export function forfeit(pub: PublicState, loser: Seat, reason: 'resign' | 'timeout'): PublicState {
+  if (pub.winner !== null) return pub;
+  const next = structuredClone(pub);
   const winner = opponentOf(loser);
-  s.pub.winner = winner;
-  s.pub.winReason = reason;
-  s.pub.pending = [];
-  log(s, { t: 'end', winner, reason });
-  return s;
+  next.winner = winner;
+  next.winReason = reason;
+  next.pending = [];
+  next.log.push({ t: 'end', winner, reason });
+  if (next.log.length > MAX_LOG_ENTRIES) next.log.splice(0, next.log.length - MAX_LOG_ENTRIES);
+  return next;
 }
