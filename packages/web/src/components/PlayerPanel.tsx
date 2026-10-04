@@ -14,11 +14,22 @@ interface Props {
   /** Identifiants des cartes réservées (connus seulement pour soi). */
   reserved?: string[];
   onReserved?: (cardId: string) => void;
+  /** Fourni quand le joueur peut utiliser ses Log Pose maintenant : le compteur devient un bouton. */
+  onPrivileges?: () => void;
   timer?: string | null;
 }
 
 /** Tableau d'un joueur : jetons, bonus, Renommée par couleur, réserves, cartes Empereur. */
-export function PlayerPanel({ info, player, active, isMe, reserved, onReserved, timer }: Props) {
+export function PlayerPanel({
+  info,
+  player,
+  active,
+  isMe,
+  reserved,
+  onReserved,
+  onPrivileges,
+  timer,
+}: Props) {
   const s = summarize(player);
   return (
     <section
@@ -38,10 +49,22 @@ export function PlayerPanel({ info, player, active, isMe, reserved, onReserved, 
           <span title={TERMS.crowns}>
             <img src={ICONS.crown} alt={TERMS.crowns} className="inline-icon" /> {s.crowns}
           </span>
-          <span title={TERMS.privileges}>
-            <img src={ICONS.privilege} alt={TERMS.privileges} className="inline-icon" />{' '}
-            {player.privileges}
-          </span>
+          {onPrivileges ? (
+            <button
+              type="button"
+              className="privilege-button"
+              onClick={onPrivileges}
+              title={`Utiliser mes ${TERMS.privileges}`}
+            >
+              <img src={ICONS.privilege} alt="" className="inline-icon" /> {player.privileges}
+              <span className="privilege-button-label">Utiliser</span>
+            </button>
+          ) : (
+            <span title={TERMS.privileges}>
+              <img src={ICONS.privilege} alt={TERMS.privileges} className="inline-icon" />{' '}
+              {player.privileges}
+            </span>
+          )}
         </div>
       </header>
 

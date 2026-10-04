@@ -3,6 +3,7 @@ import type { ReactNode } from 'react';
 import { getLegalMoves } from '@gld/engine';
 import type { GameDoc, Move, PlayerView, Seat } from '@gld/engine';
 import { api, errorMessage } from '../api';
+import { Bag } from '../components/Bag';
 import { Board } from '../components/Board';
 import { RoyalView } from '../components/Cards';
 import { CardSheet } from '../components/CardSheet';
@@ -14,6 +15,7 @@ import { PlayerPanel } from '../components/PlayerPanel';
 import { Pyramid } from '../components/Pyramid';
 import { useToast } from '../components/Toast';
 import { Treasure } from '../components/Treasure';
+import { useBagAnimation } from '../hooks/useBagAnimation';
 import { useMoveSender } from '../hooks/useMoveSender';
 import { useNow } from '../hooks/useNow';
 import { ICONS, RESOURCES, TERMS } from '../theme';
@@ -78,6 +80,7 @@ export function GameView({ gameId, game, reserved, uid }: Props) {
 
   const onError = useCallback((message: string) => toast(message), [toast]);
   const { send, busy } = useMoveSender(gameId, game.version, onError);
+  const bagAnimation = useBagAnimation(pub.board, pub.bagCount);
   const play = (move: Move) => {
     setSheet(null);
     void send(move);
@@ -128,6 +131,15 @@ export function GameView({ gameId, game, reserved, uid }: Props) {
   }
 
   /* ---------- Actions ---------- */
+  /** Passe en mode Log Pose en conservant les jetons déjà sélectionnés (hors Berry). */
+  function startPrivileges(from: readonly number[] = []) {
+    const eligible = from.filter((cell) => {
+      const token = pub.board[cell];
+      return token !== null && token !== undefined && token !== 'gold';
+    });
+    setMode({ kind: 'privilege', cells: eligible.slice(0, me.privileges) });
+  }
+
   function reserveWith(target: SheetTarget, goldCell: number) {
     play(
       target.kind === 'card'
@@ -144,6 +156,15 @@ export function GameView({ gameId, game, reserved, uid }: Props) {
   }
 
   const canUsePrivileges = legal.some((m) => m.type === 'usePrivileges');
+  // Pourquoi les Log Pose possédés ne sont pas utilisables maintenant (affiché au joueur).
+  const privilegeBlocker =
+    !mainPhase || me.privileges === 0 || canUsePrivileges
+      ? null
+      : pub.flags.replenished
+        ? `Les ${TERMS.privileges} s’utilisent avant de remplir le plateau : ils resteront pour ton prochain tour.`
+        : pub.flags.usedPrivileges
+          ? `Tu as déjà utilisé tes ${TERMS.privileges} ce tour-ci.`
+          : `Aucune ressource à prendre avec un ${TERMS.privilege} (les ${RESOURCES.gold.plural} sont exclus).`;
   const canReplenish = legal.some((m) => m.type === 'replenish');
   const canPass = legal.some((m) => m.type === 'pass');
   const buyable = useMemo(
@@ -156,6 +177,19 @@ export function GameView({ gameId, game, reserved, uid }: Props) {
   const remaining = deadline !== null ? deadline - now : null;
   const timer = playing && remaining !== null ? formatTime(remaining) : null;
   const canClaim = playing && !myTurn && remaining !== null && remaining <= 0;
+
+  /** Toucher le sac : remplit le plateau si c'est permis, sinon explique pourquoi. */
+  function onBag() {
+    if (mainPhase && canReplenish && !busy) {
+      play({ type: 'replenish' });
+      return;
+    }
+    const count = `Le sac contient ${pub.bagCount} jeton${pub.bagCount > 1 ? 's' : ''}.`;
+    if (pub.bagCount === 0) toast('Le sac est vide : rien à remettre sur le plateau.', 'info');
+    else if (!myTurn) toast(`${count} Tu pourras remplir le plateau pendant ton tour.`, 'info');
+    else if (pub.flags.replenished) toast('Le plateau a déjà été rempli ce tour-ci.', 'info');
+    else toast(`${count} Termine d’abord la décision en cours.`, 'info');
+  }
 
   async function claim() {
     try {
@@ -216,6 +250,12 @@ export function GameView({ gameId, game, reserved, uid }: Props) {
         >
           Prendre {mode.cells.length} jeton{mode.cells.length > 1 ? 's' : ''}
         </button>
+        {canUsePrivileges && (
+          <button className="secondary" onClick={() => startPrivileges(mode.cells)}>
+            <img src={ICONS.privilege} alt="" className="inline-icon" /> Prendre avec{' '}
+            {TERMS.privilege} ({me.privileges})
+          </button>
+        )}
         <button className="ghost" onClick={() => setMode(IDLE)}>
           Annuler
         </button>
@@ -235,7 +275,11 @@ export function GameView({ gameId, game, reserved, uid }: Props) {
         <button className="ghost" onClick={() => setMode(IDLE)}>
           Annuler
         </button>
-        <p className="hint">Choisis n’importe quels jetons (sauf {RESOURCES.gold.plural}).</p>
+        <p className="hint">
+          Choisis jusqu’à {me.privileges} jeton{me.privileges > 1 ? 's' : ''}, n’importe où sur le
+          plateau (sauf {RESOURCES.gold.plural}). Ensuite, ton tour continue : tu fais encore ton
+          action principale. Les {TERMS.privileges} non dépensés sont conservés.
+        </p>
       </div>
     );
   } else if (mode.kind === 'reserveGold') {
@@ -252,17 +296,12 @@ export function GameView({ gameId, game, reserved, uid }: Props) {
       <div className="action-row">
         <p className="hint">
           <strong>À toi de jouer{timer && ` · ${timer}`}</strong> — touche des jetons à prendre ou
-          une carte à recruter/réserver.
+          une carte à recruter/réserver{canReplenish && ', ou le sac pour remplir le plateau'}.
         </p>
         {canUsePrivileges && (
-          <button className="secondary" onClick={() => setMode({ kind: 'privilege', cells: [] })}>
+          <button className="secondary" onClick={() => startPrivileges()}>
             <img src={ICONS.privilege} alt="" className="inline-icon" /> Utiliser {TERMS.privilege}{' '}
             ({me.privileges})
-          </button>
-        )}
-        {canReplenish && (
-          <button className="secondary" disabled={busy} onClick={() => play({ type: 'replenish' })}>
-            Remplir le plateau ({pub.bagCount})
           </button>
         )}
         {canPass && (
@@ -270,6 +309,7 @@ export function GameView({ gameId, game, reserved, uid }: Props) {
             Passer
           </button>
         )}
+        {privilegeBlocker && <p className="hint">{privilegeBlocker}</p>}
       </div>
     );
   }
@@ -319,11 +359,10 @@ export function GameView({ gameId, game, reserved, uid }: Props) {
             ))}
           </div>
           <div className="supply">
-            <span title={`${TERMS.privileges} disponibles`}>
-              <img src={ICONS.privilege} alt={TERMS.privileges} className="inline-icon" /> ×
-              {pub.privileges}
+            <span title={`${TERMS.privileges} en réserve (pas encore attribués aux joueurs)`}>
+              Réserve : <img src={ICONS.privilege} alt={TERMS.privileges} className="inline-icon" />{' '}
+              ×{pub.privileges}
             </span>
-            <span title="Jetons dans le sac">👝 {pub.bagCount}</span>
           </div>
         </div>
 
@@ -337,7 +376,14 @@ export function GameView({ gameId, game, reserved, uid }: Props) {
         </div>
 
         <div className="area-board">
-          <Board board={pub.board} selectable={selectable} selected={selected} onCell={onCell} />
+          <Board
+            ref={bagAnimation.boardRef}
+            board={pub.board}
+            selectable={selectable}
+            selected={selected}
+            onCell={onCell}
+            hidden={bagAnimation.hiddenCells}
+          />
         </div>
 
         <div className="area-me">
@@ -348,6 +394,7 @@ export function GameView({ gameId, game, reserved, uid }: Props) {
             isMe
             reserved={reserved}
             onReserved={(cardId) => setSheet({ kind: 'card', cardId })}
+            onPrivileges={canUsePrivileges ? () => startPrivileges() : undefined}
             timer={myTurn ? timer : null}
           />
         </div>
@@ -359,7 +406,18 @@ export function GameView({ gameId, game, reserved, uid }: Props) {
       </div>
 
       <div className={`action-bar ${myTurn ? 'my-turn' : ''}`} aria-busy={busy}>
-        {actionBar}
+        <div className="action-bar-inner">
+          <Bag
+            ref={bagAnimation.bagRef}
+            count={pub.bagCount}
+            open={bagAnimation.bagOpen}
+            shaking={bagAnimation.shaking}
+            bounceKey={bagAnimation.bounceKey}
+            canRefill={mainPhase && canReplenish && !busy}
+            onClick={onBag}
+          />
+          <div className="action-content">{actionBar}</div>
+        </div>
       </div>
 
       {sheet && (

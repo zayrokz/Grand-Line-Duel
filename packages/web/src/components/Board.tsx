@@ -1,3 +1,4 @@
+import type { Ref } from 'react';
 import type { TokenColor } from '@gld/engine';
 import { RESOURCES } from '../theme';
 
@@ -6,12 +7,15 @@ interface Props {
   selectable: ReadonlySet<number>;
   selected: ReadonlySet<number>;
   onCell: (cell: number) => void;
+  /** Cases dont le jeton est encore « en vol » depuis le sac (affiché à l'atterrissage). */
+  hidden?: ReadonlySet<number>;
+  ref?: Ref<HTMLDivElement>;
 }
 
 /** Plateau 5×5 de jetons. Seules les cases jouables sont activables. */
-export function Board({ board, selectable, selected, onCell }: Props) {
+export function Board({ board, selectable, selected, onCell, hidden, ref }: Props) {
   return (
-    <div className="board" role="grid" aria-label="Plateau de ressources">
+    <div ref={ref} className="board" role="grid" aria-label="Plateau de ressources">
       {board.map((token, cell) => {
         const canSelect = selectable.has(cell);
         const isSelected = selected.has(cell);
@@ -22,6 +26,7 @@ export function Board({ board, selectable, selected, onCell }: Props) {
             type="button"
             role="gridcell"
             className="cell"
+            data-cell={cell}
             data-selectable={canSelect}
             data-selected={isSelected}
             disabled={!canSelect && !isSelected}
@@ -29,7 +34,7 @@ export function Board({ board, selectable, selected, onCell }: Props) {
             aria-label={`Ligne ${Math.floor(cell / 5) + 1}, colonne ${(cell % 5) + 1} : ${label}`}
             onClick={() => onCell(cell)}
           >
-            {token && (
+            {token && !hidden?.has(cell) && (
               <img
                 key={`${cell}-${token}`}
                 className="cell-token"

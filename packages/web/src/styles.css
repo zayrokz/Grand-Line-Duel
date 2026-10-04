@@ -639,7 +639,8 @@ button.card:hover:not(:disabled) {
 .game-grid {
   display: grid;
   gap: 0.6rem;
-  margin-bottom: 0.6rem;
+  /* Place pour le sac qui dépasse de la barre d'action. */
+  margin-bottom: 2.6rem;
   grid-template-columns: minmax(0, 1fr);
   grid-template-areas:
     'opp'
@@ -831,6 +832,19 @@ button.card:hover:not(:disabled) {
   font-weight: 800;
   white-space: nowrap;
 }
+.privilege-button {
+  min-height: 36px;
+  padding: 0.1rem 0.5rem;
+  border-radius: 999px;
+  background: var(--sea);
+  color: #fff;
+  font-weight: 800;
+  box-shadow: 0 0 0 2px var(--accent);
+  animation: glow 2s ease-in-out infinite;
+}
+.privilege-button-label {
+  font-size: 0.75rem;
+}
 .player-tokens {
   display: flex;
   flex-wrap: wrap;
@@ -899,8 +913,6 @@ button.card:hover:not(:disabled) {
   z-index: 20;
   margin: auto -0.75rem -0.75rem;
   min-height: 64px;
-  max-height: 55vh;
-  overflow-y: auto;
   padding: 0.6rem 0.75rem calc(0.6rem + env(safe-area-inset-bottom));
   background: rgba(10, 20, 34, 0.96);
   border-top: 2px solid rgba(255, 255, 255, 0.12);
@@ -908,9 +920,149 @@ button.card:hover:not(:disabled) {
   display: flex;
   justify-content: center;
 }
-.action-bar > * {
+.action-bar-inner {
+  display: flex;
+  align-items: flex-end;
+  gap: 0.75rem;
   width: 100%;
-  max-width: 900px;
+  max-width: none;
+}
+.action-content {
+  flex: 1;
+  min-width: 0;
+  max-height: 50vh;
+  overflow-y: auto;
+  align-self: center;
+}
+
+/* ---------- Sac (pioche) ---------- */
+.bag {
+  position: relative;
+  flex: none;
+  align-self: flex-end;
+  width: 76px;
+  height: 92px;
+  min-width: 0;
+  min-height: 0;
+  margin-top: -36px;
+  padding: 0;
+  border: none;
+  background: none;
+  cursor: pointer;
+  filter: drop-shadow(0 6px 8px rgba(0, 0, 0, 0.55));
+}
+.bag-glow {
+  position: absolute;
+  inset: 0;
+  display: block;
+}
+.bag:active .bag-glow {
+  transform: scale(0.95);
+}
+.bag-body {
+  position: absolute;
+  inset: 0;
+  display: block;
+  transform-origin: 50% 90%;
+}
+.bag-img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  transition:
+    opacity 0.15s ease,
+    transform 0.25s ease;
+  pointer-events: none;
+}
+.bag-img-open {
+  opacity: 0;
+  transform: scale(0.94);
+}
+.bag-is-open .bag-img-open {
+  opacity: 1;
+  transform: scale(1.08) translateY(-4px);
+}
+.bag-is-open .bag-img-closed {
+  opacity: 0;
+}
+.bag-shake .bag-body {
+  animation: bag-shake 0.32s ease-in-out;
+}
+.bag-bounce {
+  animation: bag-bounce 0.5s ease-out;
+}
+.bag-ready {
+  filter: drop-shadow(0 0 10px var(--accent)) drop-shadow(0 6px 8px rgba(0, 0, 0, 0.55));
+}
+.bag-ready .bag-glow {
+  animation: bag-breathe 1.8s ease-in-out infinite;
+}
+.bag-count {
+  position: absolute;
+  right: -6px;
+  bottom: 8px;
+  min-width: 26px;
+  height: 26px;
+  padding: 0 5px;
+  border-radius: 999px;
+  display: grid;
+  place-items: center;
+  background: var(--wood-dark);
+  color: #fff;
+  border: 2px solid var(--accent);
+  font-weight: 800;
+  font-size: 0.85rem;
+}
+.bag-ribbon {
+  position: absolute;
+  left: 50%;
+  bottom: -4px;
+  transform: translateX(-50%);
+  padding: 1px 8px;
+  border-radius: 999px;
+  background: var(--accent);
+  color: var(--accent-ink);
+  font-weight: 800;
+  font-size: 0.72rem;
+  white-space: nowrap;
+}
+.flying-token {
+  position: fixed;
+  left: 0;
+  top: 0;
+  z-index: 60;
+  pointer-events: none;
+  will-change: transform;
+  filter: drop-shadow(0 4px 6px rgba(0, 0, 0, 0.45));
+}
+@keyframes bag-shake {
+  20% {
+    transform: rotate(-10deg);
+  }
+  40% {
+    transform: rotate(9deg);
+  }
+  60% {
+    transform: rotate(-6deg);
+  }
+  80% {
+    transform: rotate(4deg);
+  }
+}
+@keyframes bag-bounce {
+  35% {
+    transform: scale(1.12, 0.88);
+  }
+  65% {
+    transform: scale(0.95, 1.06);
+  }
+}
+@keyframes bag-breathe {
+  50% {
+    transform: translateY(-3px) scale(1.03);
+  }
 }
 .action-bar.my-turn {
   border-top-color: var(--accent);
@@ -1190,6 +1342,14 @@ button.card:hover:not(:disabled) {
   }
   .board {
     --cell: 62px;
+  }
+  .bag {
+    width: 104px;
+    height: 126px;
+    margin-top: -64px;
+  }
+  .game-grid {
+    margin-bottom: 4.2rem;
   }
   .desktop-only {
     display: block;

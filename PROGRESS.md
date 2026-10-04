@@ -60,6 +60,14 @@ Fichier de suivi pour reprendre le travail d'une session à l'autre.
 - Durcissement du hasard : SHA-256 en mode compteur, graine de 256 bits (au lieu de 32 bits).
 - `README.md` (français), `docs/SECURITY.md` (revue de sécurité), `docs/ARCHITECTURE.md` à jour.
 
+- Sac (pioche) illustré (`assets/bag/`, découpé depuis la planche fournie) en bas à gauche : il
+  affiche le nombre de jetons, s'illumine quand on peut remplir le plateau (toucher le sac =
+  remplir), tremble, s'ouvre et projette les jetons un par un vers leurs cases (ordre de la
+  spirale) chez les deux joueurs ; rebondit quand des jetons y retournent. Désactivé si
+  « réduire les animations » est demandé par le système.
+- Log Pose : utilisables depuis une sélection de jetons ou en touchant son compteur ; explication
+  affichée quand ils ne sont pas utilisables.
+
 ## En cours
 
 - Rien : toutes les phases sont terminées.

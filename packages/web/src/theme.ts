@@ -7,6 +7,7 @@
  * - ressources : remplacez les SVG de `src/assets/tokens/` (même nom de fichier) ;
  * - cartes : déposez `src/assets/cards/<id>.(webp|png|jpg|svg)` (ex. `L1-07.webp`) ;
  * - cartes Empereur : `src/assets/royals/<id>.(webp|png|jpg|svg)` (ex. `R-2.webp`) ;
+ * - sac (pioche) : `src/assets/bag/bag-closed.webp` et `bag-open.webp` ;
  * sinon le placeholder (emoji défini ci-dessous par famille ou par carte) est utilisé.
  */
 import type {
@@ -25,6 +26,8 @@ import greenIcon from './assets/tokens/green.svg';
 import pearlIcon from './assets/tokens/pearl.svg';
 import redIcon from './assets/tokens/red.svg';
 import whiteIcon from './assets/tokens/white.svg';
+import bagClosed from './assets/bag/bag-closed.webp';
+import bagOpen from './assets/bag/bag-open.webp';
 import cardBack from './assets/card-back.svg';
 import logPoseIcon from './assets/logpose.svg';
 import logo from './assets/logo.svg';
@@ -107,6 +110,9 @@ export const ICONS = {
   treasure: treasureIcon,
   logo,
   cardBack,
+  /** Sac (pioche) fermé / ouvert : `src/assets/bag/`. */
+  bagClosed,
+  bagOpen,
 };
 
 export type CardKind = 'crew' | 'ship' | 'gear';
