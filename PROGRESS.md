@@ -7,7 +7,7 @@ Fichier de suivi pour reprendre le travail d'une session à l'autre.
 | Phase                                                           | Statut                            |
 | --------------------------------------------------------------- | --------------------------------- |
 | 1. Architecture, modèle de données, arborescence, plan de tests | ✅ fait (`docs/ARCHITECTURE.md`)  |
-| 2. Moteur de règles et tests                                    | ✅ fait (81 tests)                |
+| 2. Moteur de règles et tests                                    | ✅ fait (90 tests)                |
 | 3. Cloud Functions, règles Firestore, tests émulateur           | ✅ fait (26 tests émulateur)      |
 | 4. Interface (accueil, profil, salon, plateau, fin de partie)   | ✅ fait (validée de bout en bout) |
 | 5. CI/CD, PWA, en-têtes de sécurité, README                     | ⏳ en cours                       |
