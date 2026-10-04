@@ -124,8 +124,8 @@ export interface PublicState {
 
 /** Partie cachée : ne quitte jamais le serveur. */
 export interface SecretState {
-  /** État 32 bits du générateur pseudo-aléatoire. */
-  rng: number;
+  /** Générateur pseudo-aléatoire : graine secrète de 256 bits et compteur de tirages. */
+  rng: { seed: string; counter: number };
   /** Paquets ordonnés : l'index 0 est la carte du dessus. */
   decks: Record<Level, string[]>;
   bag: TokenColor[];

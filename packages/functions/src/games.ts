@@ -1,4 +1,4 @@
-import { randomInt } from 'node:crypto';
+import { randomBytes } from 'node:crypto';
 import { FieldValue, Timestamp } from 'firebase-admin/firestore';
 import type { DocumentSnapshot, Firestore, Transaction } from 'firebase-admin/firestore';
 import { AVATAR_IDS, createGame, summarize, TURN_TIMEOUT_MS } from '@gld/engine';
@@ -57,8 +57,8 @@ export function seatInfo(snap: DocumentSnapshot, uid: string): SeatInfo {
   };
 }
 
-/** Graine 32 bits tirée par le serveur (jamais exposée au client). */
-export const newSeed = (): number => randomInt(0, 2 ** 32);
+/** Graine de 256 bits tirée par le serveur (jamais exposée au client). */
+export const newSeed = (): string => randomBytes(32).toString('hex');
 
 /**
  * Démarre une partie : état public dans `games/{id}`, réserves vides dans les documents privés,
@@ -70,7 +70,7 @@ export function startGameWrites(
   gameId: string,
   players: SeatInfo[],
   now: number,
-  seed: number = newSeed(),
+  seed: string = newSeed(),
 ): Partial<StoredGame> {
   const state = createGame(seed);
   for (const player of players) tx.set(refs(db).private(gameId, player.uid), { reserved: [] });

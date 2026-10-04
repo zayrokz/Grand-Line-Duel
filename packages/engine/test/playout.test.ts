@@ -11,7 +11,7 @@ import {
   TOKEN_COLORS,
   validateMove,
 } from '../src/index.js';
-import type { GameState, Move } from '../src/index.js';
+import type { GameState, Move, RngState } from '../src/index.js';
 
 function checkInvariants(s: GameState): void {
   const { pub, sec } = s;
@@ -64,8 +64,8 @@ function checkInvariants(s: GameState): void {
 
 /** Joue une partie complète en choisissant des coups légaux au hasard (biaisés vers l'achat). */
 function randomGame(seed: number): { state: GameState; moves: number } {
-  let state = createGame(seed);
-  let rng = seed ^ 0x9e3779b9;
+  let state = createGame(`partie-${seed}`);
+  let rng: RngState = { seed: `joueur-${seed}`, counter: 0 };
   let moves = 0;
   while (state.pub.winner === null && moves < 2000) {
     const seat = state.pub.current;
@@ -110,7 +110,7 @@ describe('parties aléatoires complètes', () => {
 
 describe('cohérence getLegalMoves ⇔ validateMove', () => {
   it('rejette les coups de prise qui ne sont pas énumérés', () => {
-    const s = createGame(5, 0);
+    const s = createGame('coherence', 0);
     const view = toPlayerView(s, 0);
     const legal = new Set(
       getLegalMoves(view)

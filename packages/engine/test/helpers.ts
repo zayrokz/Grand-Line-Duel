@@ -19,7 +19,7 @@ import type {
 } from '../src/index.js';
 
 /** Partie neuve, premier joueur imposé (siège 0 par défaut). */
-export function newGame(seed = 42, first: Seat = 0): GameState {
+export function newGame(seed = 'graine-de-test', first: Seat = 0): GameState {
   return createGame(seed, first);
 }
 

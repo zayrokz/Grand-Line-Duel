@@ -6,6 +6,7 @@ export * from './rules.js';
 export * from './apply.js';
 export * from './setup.js';
 export * from './view.js';
-export { nextRandom, shuffle } from './rng.js';
+export { nextRandom, sha256Hex, shuffle } from './rng.js';
+export type { RngState } from './rng.js';
 export { CardDataSchema, MoveSchema, parseMove } from './schema.js';
 export * from './protocol.js';

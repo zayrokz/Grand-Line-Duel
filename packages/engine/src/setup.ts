@@ -2,6 +2,7 @@ import { PYRAMID_SIZE, cardsOfLevel } from './cards.js';
 import { CELL_COUNT, placeOnBoard } from './board.js';
 import { emptyTokens, TOTAL_PRIVILEGES } from './player.js';
 import { nextRandom, shuffle } from './rng.js';
+import type { RngState } from './rng.js';
 import { GEM_COLORS, LEVELS } from './types.js';
 import type { GameState, Level, PlayerState, Seat, TokenColor } from './types.js';
 
@@ -19,11 +20,13 @@ function newPlayer(): PlayerState {
 }
 
 /**
- * Mise en place d'une partie à partir d'une graine. Le premier joueur est tiré avec la graine
- * sauf s'il est imposé (tests). Son adversaire reçoit 1 Log Pose.
+ * Mise en place d'une partie à partir d'une graine secrète (64 caractères hexadécimaux tirés par
+ * le serveur). Le premier joueur est tiré avec la graine sauf s'il est imposé (tests). Son
+ * adversaire reçoit 1 Log Pose.
  */
-export function createGame(seed: number, first?: Seat): GameState {
-  let rng = seed >>> 0;
+export function createGame(seed: string, first?: Seat): GameState {
+  if (seed.length === 0) throw new Error('Graine vide');
+  let rng: RngState = { seed, counter: 0 };
   let firstSeat: Seat;
   if (first === undefined) {
     const [r, next] = nextRandom(rng);

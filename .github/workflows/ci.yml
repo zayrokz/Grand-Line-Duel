@@ -1,0 +1,121 @@
+name: CI / CD
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+# Moindre privilège par défaut ; chaque job élargit si nécessaire.
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+jobs:
+  checks:
+    name: Lint, format, typecheck, tests moteur
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - run: npm ci
+      - run: npm run lint
+      - run: npm run format:check
+      - run: npm run typecheck
+      - run: npm test
+
+  emulator-tests:
+    name: Règles Firestore et Functions (émulateur)
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    needs: checks
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+      - name: Cache des émulateurs Firebase
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/firebase/emulators
+          key: firebase-emulators-${{ hashFiles('package-lock.json') }}
+      - run: npm ci
+      - run: npm run test:emulator
+
+  build:
+    name: Build (functions + web)
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    needs: checks
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - run: npm ci
+      # Build de vérification avec une configuration factice (aucun secret nécessaire).
+      - run: npm run build
+        env:
+          VITE_USE_EMULATORS: 'true'
+
+  deploy:
+    name: Déploiement Firebase
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    needs: [checks, emulator-tests, build]
+    # Environnement GitHub « production » : permet d'exiger une approbation et d'y ranger
+    # les variables/secrets ci-dessous.
+    environment: production
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - run: npm ci
+
+      - name: Paramètres des Functions
+        run: printf 'ALLOWED_ORIGINS=%s\n' "$ALLOWED_ORIGINS" > packages/functions/.env
+        env:
+          ALLOWED_ORIGINS: ${{ vars.ALLOWED_ORIGINS }}
+
+      - name: Build
+        run: npm run build
+        env:
+          # Configuration web Firebase : publique par nature (variables de dépôt, pas des secrets).
+          VITE_FIREBASE_API_KEY: ${{ vars.VITE_FIREBASE_API_KEY }}
+          VITE_FIREBASE_AUTH_DOMAIN: ${{ vars.VITE_FIREBASE_AUTH_DOMAIN }}
+          VITE_FIREBASE_PROJECT_ID: ${{ vars.FIREBASE_PROJECT_ID }}
+          VITE_FIREBASE_APP_ID: ${{ vars.VITE_FIREBASE_APP_ID }}
+          VITE_FIREBASE_MESSAGING_SENDER_ID: ${{ vars.VITE_FIREBASE_MESSAGING_SENDER_ID }}
+          VITE_FIREBASE_STORAGE_BUCKET: ${{ vars.VITE_FIREBASE_STORAGE_BUCKET }}
+          VITE_RECAPTCHA_ENTERPRISE_SITE_KEY: ${{ vars.VITE_RECAPTCHA_ENTERPRISE_SITE_KEY }}
+          VITE_USE_EMULATORS: 'false'
+
+      - name: Authentification Google Cloud
+        uses: google-github-actions/auth@v2
+        with:
+          # Clé JSON d'un compte de service dédié au déploiement (secret GitHub).
+          credentials_json: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
+
+      - name: Déploiement (Firestore, Functions, Hosting)
+        run: >
+          npx firebase deploy
+          --only firestore,functions,hosting
+          --project "${{ vars.FIREBASE_PROJECT_ID }}"
+          --non-interactive
+          --force

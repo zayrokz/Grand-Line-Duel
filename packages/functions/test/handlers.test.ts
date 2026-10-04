@@ -393,3 +393,12 @@ describe('nettoyage planifié', () => {
     expect(await cleanupGames(db, clock + 60 * 1000)).toEqual({ expired: 0, closed: 0 });
   });
 });
+
+describe('hasard', () => {
+  it('tire une graine secrète de 256 bits par partie', async () => {
+    const { gameId } = await startedGame();
+    const sec = await secretDoc(gameId);
+    expect(sec.rng.seed).toMatch(/^[0-9a-f]{64}$/);
+    expect(JSON.stringify(await gameDoc(gameId))).not.toContain(sec.rng.seed);
+  });
+});
