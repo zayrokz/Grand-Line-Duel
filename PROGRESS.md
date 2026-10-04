@@ -8,9 +8,9 @@ Fichier de suivi pour reprendre le travail d'une session à l'autre.
 | --------------------------------------------------------------- | --------------------------------- |
 | 1. Architecture, modèle de données, arborescence, plan de tests | ✅ fait (`docs/ARCHITECTURE.md`)  |
 | 2. Moteur de règles et tests                                    | ✅ fait (90 tests)                |
-| 3. Cloud Functions, règles Firestore, tests émulateur           | ✅ fait (26 tests émulateur)      |
+| 3. Cloud Functions, règles Firestore, tests émulateur           | ✅ fait (27 tests émulateur)      |
 | 4. Interface (accueil, profil, salon, plateau, fin de partie)   | ✅ fait (validée de bout en bout) |
-| 5. CI/CD, PWA, en-têtes de sécurité, README                     | ⏳ en cours                       |
+| 5. CI/CD, PWA, en-têtes de sécurité, README                     | ✅ fait                           |
 
 ## Fait
 
@@ -18,13 +18,14 @@ Fichier de suivi pour reprendre le travail d'une session à l'autre.
 - Configuration TypeScript strict (TS 6.0 — la 7.x n'est pas encore supportée par typescript-eslint),
   ESLint 10 (flat config), Prettier.
 - Document d'architecture et modèle de données.
-- Moteur `@gld/engine` : types, données validées par Zod, PRNG à graine, plateau/spirale,
+- Moteur `@gld/engine` : types, données validées par Zod, PRNG à graine (SHA-256), plateau/spirale,
   `validateMove`, `getLegalMoves`, `applyMove`, `forfeit`, vues joueur, schéma des coups.
 - Données de jeu officielles fournies (`packages/engine/data/cards.json`), utilisées telles quelles
   comme source de vérité et validées par Zod (cartes, cartes Royales, `meta`).
 - Tests moteur : données, plateau, mise en place, jetons, Log Pose, remplissage, réservation, achat,
   capacités, Primes/cartes Empereur, défausse, victoires, abandon, 40 parties aléatoires complètes
-  avec invariants (25 jetons, 3 Log Pose, 67 cartes, 4 Empereurs, aucun secret dans l'état public).
+  avec invariants (25 jetons, 3 Log Pose, 67 cartes, 4 Empereurs, aucun secret dans l'état public),
+  carte à capacités multiples (L3-12), validation du fichier de données et de `meta`.
 
 - Contrat partagé client/serveur (`packages/engine/src/protocol.ts`) : documents Firestore,
   codes d'erreur, validation du pseudo, des avatars, des codes de salon et des identifiants.
@@ -35,7 +36,7 @@ Fichier de suivi pour reprendre le travail d'une session à l'autre.
   workspace). Vérifié de bout en bout dans l'émulateur Functions + Auth.
 - `firestore.rules` (deny by default), `firestore.indexes.json`, `firebase.json` (hosting avec
   en-têtes de sécurité, functions, émulateurs).
-- Tests émulateur : 6 tests de règles + 20 tests de handlers.
+- Tests émulateur : 6 tests de règles + 21 tests de handlers.
 
 - Client web (`packages/web`, React 19 + Vite 8 + react-router 7) : accueil (profil, créer,
   rejoindre, reprendre), profil (pseudo, avatar, statistiques, historique, liaison Google / e-mail),
