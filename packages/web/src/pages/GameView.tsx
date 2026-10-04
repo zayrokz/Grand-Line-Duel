@@ -128,6 +128,15 @@ export function GameView({ gameId, game, reserved, uid }: Props) {
   }
 
   /* ---------- Actions ---------- */
+  /** Passe en mode Log Pose en conservant les jetons déjà sélectionnés (hors Berry). */
+  function startPrivileges(from: readonly number[] = []) {
+    const eligible = from.filter((cell) => {
+      const token = pub.board[cell];
+      return token !== null && token !== undefined && token !== 'gold';
+    });
+    setMode({ kind: 'privilege', cells: eligible.slice(0, me.privileges) });
+  }
+
   function reserveWith(target: SheetTarget, goldCell: number) {
     play(
       target.kind === 'card'
@@ -144,6 +153,15 @@ export function GameView({ gameId, game, reserved, uid }: Props) {
   }
 
   const canUsePrivileges = legal.some((m) => m.type === 'usePrivileges');
+  // Pourquoi les Log Pose possédés ne sont pas utilisables maintenant (affiché au joueur).
+  const privilegeBlocker =
+    !mainPhase || me.privileges === 0 || canUsePrivileges
+      ? null
+      : pub.flags.replenished
+        ? `Les ${TERMS.privileges} s’utilisent avant de remplir le plateau : ils resteront pour ton prochain tour.`
+        : pub.flags.usedPrivileges
+          ? `Tu as déjà utilisé tes ${TERMS.privileges} ce tour-ci.`
+          : `Aucune ressource à prendre avec un ${TERMS.privilege} (les ${RESOURCES.gold.plural} sont exclus).`;
   const canReplenish = legal.some((m) => m.type === 'replenish');
   const canPass = legal.some((m) => m.type === 'pass');
   const buyable = useMemo(
@@ -216,6 +234,12 @@ export function GameView({ gameId, game, reserved, uid }: Props) {
         >
           Prendre {mode.cells.length} jeton{mode.cells.length > 1 ? 's' : ''}
         </button>
+        {canUsePrivileges && (
+          <button className="secondary" onClick={() => startPrivileges(mode.cells)}>
+            <img src={ICONS.privilege} alt="" className="inline-icon" /> Prendre avec{' '}
+            {TERMS.privilege} ({me.privileges})
+          </button>
+        )}
         <button className="ghost" onClick={() => setMode(IDLE)}>
           Annuler
         </button>
@@ -235,7 +259,11 @@ export function GameView({ gameId, game, reserved, uid }: Props) {
         <button className="ghost" onClick={() => setMode(IDLE)}>
           Annuler
         </button>
-        <p className="hint">Choisis n’importe quels jetons (sauf {RESOURCES.gold.plural}).</p>
+        <p className="hint">
+          Choisis jusqu’à {me.privileges} jeton{me.privileges > 1 ? 's' : ''}, n’importe où sur le
+          plateau (sauf {RESOURCES.gold.plural}). Ensuite, ton tour continue : tu fais encore ton
+          action principale. Les {TERMS.privileges} non dépensés sont conservés.
+        </p>
       </div>
     );
   } else if (mode.kind === 'reserveGold') {
@@ -255,7 +283,7 @@ export function GameView({ gameId, game, reserved, uid }: Props) {
           une carte à recruter/réserver.
         </p>
         {canUsePrivileges && (
-          <button className="secondary" onClick={() => setMode({ kind: 'privilege', cells: [] })}>
+          <button className="secondary" onClick={() => startPrivileges()}>
             <img src={ICONS.privilege} alt="" className="inline-icon" /> Utiliser {TERMS.privilege}{' '}
             ({me.privileges})
           </button>
@@ -270,6 +298,7 @@ export function GameView({ gameId, game, reserved, uid }: Props) {
             Passer
           </button>
         )}
+        {privilegeBlocker && <p className="hint">{privilegeBlocker}</p>}
       </div>
     );
   }
@@ -319,9 +348,9 @@ export function GameView({ gameId, game, reserved, uid }: Props) {
             ))}
           </div>
           <div className="supply">
-            <span title={`${TERMS.privileges} disponibles`}>
-              <img src={ICONS.privilege} alt={TERMS.privileges} className="inline-icon" /> ×
-              {pub.privileges}
+            <span title={`${TERMS.privileges} en réserve (pas encore attribués aux joueurs)`}>
+              Réserve : <img src={ICONS.privilege} alt={TERMS.privileges} className="inline-icon" />{' '}
+              ×{pub.privileges}
             </span>
             <span title="Jetons dans le sac">👝 {pub.bagCount}</span>
           </div>
@@ -348,6 +377,7 @@ export function GameView({ gameId, game, reserved, uid }: Props) {
             isMe
             reserved={reserved}
             onReserved={(cardId) => setSheet({ kind: 'card', cardId })}
+            onPrivileges={canUsePrivileges ? () => startPrivileges() : undefined}
             timer={myTurn ? timer : null}
           />
         </div>

@@ -831,6 +831,19 @@ button.card:hover:not(:disabled) {
   font-weight: 800;
   white-space: nowrap;
 }
+.privilege-button {
+  min-height: 36px;
+  padding: 0.1rem 0.5rem;
+  border-radius: 999px;
+  background: var(--sea);
+  color: #fff;
+  font-weight: 800;
+  box-shadow: 0 0 0 2px var(--accent);
+  animation: glow 2s ease-in-out infinite;
+}
+.privilege-button-label {
+  font-size: 0.75rem;
+}
 .player-tokens {
   display: flex;
   flex-wrap: wrap;
