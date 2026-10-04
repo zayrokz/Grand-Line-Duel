@@ -1,0 +1,17 @@
+node_modules/
+dist/
+dev-dist/
+coverage/
+*.log
+.firebase/
+.env
+.env.*
+!.env.example
+*.local
+firebase-debug.log*
+firestore-debug.log*
+ui-debug.log*
+.DS_Store
+# Clés de compte de service : ne jamais committer
+*-service-account*.json
+serviceAccount*.json

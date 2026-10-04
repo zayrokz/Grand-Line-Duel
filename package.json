@@ -1,0 +1,39 @@
+{
+  "name": "grand-line-duel",
+  "private": true,
+  "type": "module",
+  "description": "Grand Line Duel — adaptation web non commerciale de Splendor Duel, habillage pirate.",
+  "workspaces": [
+    "packages/engine",
+    "packages/functions",
+    "packages/web"
+  ],
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "lint": "eslint .",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "typecheck": "npm run typecheck --workspaces --if-present",
+    "test": "npm run test -w @gld/engine",
+    "test:emulator": "firebase emulators:exec --only firestore --project demo-grand-line-duel \"npm run test:emulator -w @gld/functions\"",
+    "build": "npm run build -w @gld/functions && npm run build -w @gld/web",
+    "emulators": "npm run build -w @gld/functions && firebase emulators:start --project demo-grand-line-duel",
+    "dev": "npm run dev -w @gld/web",
+    "check": "npm run lint && npm run format:check && npm run typecheck && npm test"
+  },
+  "devDependencies": {
+    "@eslint/js": "^10.0.1",
+    "@types/node": "^22.20.5",
+    "eslint": "^10.12.0",
+    "eslint-plugin-react-hooks": "^7.1.1",
+    "eslint-plugin-react-refresh": "^0.5.7",
+    "firebase-tools": "^15.32.1",
+    "globals": "^17.13.0",
+    "prettier": "^3.9.9",
+    "typescript": "~6.0.3",
+    "typescript-eslint": "^8.71.0",
+    "vitest": "^5.0.3"
+  }
+}
