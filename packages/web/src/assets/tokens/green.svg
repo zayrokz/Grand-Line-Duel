@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="Bois">
+  <circle cx="32" cy="32" r="30" fill="#3f8a4a" stroke="#1f4a26" stroke-width="3"/>
+  <circle cx="32" cy="32" r="23" fill="#eef7ec" stroke="#1f4a26" stroke-width="1.5" stroke-opacity=".5"/>
+  <g stroke="#5b3a1e" stroke-width="2">
+    <circle cx="25" cy="38" r="6.5" fill="#c08a52"/><circle cx="39" cy="38" r="6.5" fill="#c08a52"/><circle cx="32" cy="26" r="6.5" fill="#c08a52"/>
+  </g>
+  <g fill="none" stroke="#8a5a2c" stroke-width="1.2"><circle cx="25" cy="38" r="3"/><circle cx="39" cy="38" r="3"/><circle cx="32" cy="26" r="3"/></g>
+</svg>

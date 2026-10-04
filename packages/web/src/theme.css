@@ -1,0 +1,30 @@
+/*
+ * THÈME — couleurs, typographies et dimensions. Modifiez ces variables pour changer l'ambiance
+ * sans toucher aux composants. Les couleurs des ressources sont dans `theme.ts`.
+ */
+:root {
+  color-scheme: dark;
+  --bg: #0e1b2c;
+  --bg-2: #142a44;
+  --bg-3: #1d3a5c;
+  --text: #f3efe6;
+  --muted: #9fb0c3;
+  --panel: #f6ecd2;
+  --panel-2: #efe0b9;
+  --panel-ink: #2a2015;
+  --panel-border: #c9a96a;
+  --wood: #6b4423;
+  --wood-dark: #3d2410;
+  --accent: #e0b43a;
+  --accent-ink: #2a2015;
+  --sea: #2f6fb3;
+  --danger: #b5352b;
+  --ok: #3f8a4a;
+  --focus: #7cc4ff;
+  --radius: 12px;
+  --radius-sm: 8px;
+  --shadow: 0 6px 18px rgba(0, 0, 0, 0.35);
+  --font: system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  --font-title: Georgia, 'Palatino Linotype', 'Book Antiqua', serif;
+  --tap: 44px;
+}

@@ -4,13 +4,13 @@ Fichier de suivi pour reprendre le travail d'une session à l'autre.
 
 ## État des phases
 
-| Phase                                                           | Statut                           |
-| --------------------------------------------------------------- | -------------------------------- |
-| 1. Architecture, modèle de données, arborescence, plan de tests | ✅ fait (`docs/ARCHITECTURE.md`) |
-| 2. Moteur de règles et tests                                    | ✅ fait (81 tests)               |
-| 3. Cloud Functions, règles Firestore, tests émulateur           | ✅ fait (26 tests émulateur)     |
-| 4. Interface (accueil, profil, salon, plateau, fin de partie)   | ⏳ en cours                      |
-| 5. CI/CD, PWA, en-têtes de sécurité, README                     | à faire                          |
+| Phase                                                           | Statut                            |
+| --------------------------------------------------------------- | --------------------------------- |
+| 1. Architecture, modèle de données, arborescence, plan de tests | ✅ fait (`docs/ARCHITECTURE.md`)  |
+| 2. Moteur de règles et tests                                    | ✅ fait (81 tests)                |
+| 3. Cloud Functions, règles Firestore, tests émulateur           | ✅ fait (26 tests émulateur)      |
+| 4. Interface (accueil, profil, salon, plateau, fin de partie)   | ✅ fait (validée de bout en bout) |
+| 5. CI/CD, PWA, en-têtes de sécurité, README                     | ⏳ en cours                       |
 
 ## Fait
 
@@ -36,13 +36,24 @@ Fichier de suivi pour reprendre le travail d'une session à l'autre.
   en-têtes de sécurité, functions, émulateurs).
 - Tests émulateur : 6 tests de règles + 20 tests de handlers.
 
+- Client web (`packages/web`, React 19 + Vite 8 + react-router 7) : accueil (profil, créer,
+  rejoindre, reprendre), profil (pseudo, avatar, statistiques, historique, liaison Google / e-mail),
+  salon d'attente (code, lien de partage), plateau temps réel, décisions guidées, journal, délai de
+  tour et réclamation, abandon, fin de partie et revanche, page de règles.
+- Thème centralisé (`src/theme.ts`, `src/theme.css`) et SVG originaux (`src/assets/`) ;
+  illustrations de cartes remplaçables par simple dépôt de fichier (`assets/cards/<id>.webp`).
+- Mise en page mobile d'abord (cases ≥ 46 px, boutons ≥ 44 px), tablette et bureau (3 colonnes).
+- Vérifié avec Playwright sur émulateurs (bureau 1440×900 + mobile 390×844) : création/jonction,
+  prises de jetons, achat d'une carte joker → couleur → carte Empereur → vol, défausse, victoire,
+  revanche, historique ; aucune erreur console.
+
 ## En cours
 
-- Interface web.
+- CI/CD, PWA, en-têtes, README.
 
 ## À faire
 
-- Phases 4 et 5.
+- Phase 5.
 
 ## Décisions prises
 
@@ -71,6 +82,11 @@ Fichier de suivi pour reprendre le travail d'une session à l'autre.
   après le délai) par défaite du joueur actif.
 - **Statut `abandoned`** : abandon, dépassement du délai ou salon expiré/annulé ; `finished` :
   victoire normale.
+
+- **Sélection liée à la version** : l'état local de sélection (jetons, mode Log Pose…) est indexé
+  par `game.version` et se réinitialise à chaque coup, sans `setState` dans un effet.
+- **Barre d'action collante** (`position: sticky`) : elle ne masque jamais le plateau, même quand une
+  décision (défausse, cartes Empereur) l'agrandit.
 
 ### Interprétations de règles (ambiguïtés signalées)
 

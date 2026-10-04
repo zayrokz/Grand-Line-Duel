@@ -1,7 +1,9 @@
+import { FUNCTIONS_REGION } from '@gld/engine';
+
 export { TURN_TIMEOUT_MS } from '@gld/engine';
 
-/** Région des Functions (joueurs francophones). Doit correspondre au client web. */
-export const REGION = 'europe-west1';
+/** Région des Functions (joueurs francophones), partagée avec le client web. */
+export const REGION = FUNCTIONS_REGION;
 
 /** Un salon en attente expire au bout de 6 h. */
 export const WAITING_ROOM_TTL_MS = 6 * 60 * 60 * 1000;

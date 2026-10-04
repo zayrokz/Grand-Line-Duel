@@ -155,3 +155,6 @@ export function isMoveId(value: unknown): value is string {
 
 /** Délai accordé au joueur actif avant que l'adversaire puisse réclamer la victoire. */
 export const TURN_TIMEOUT_MS = 5 * 60 * 1000;
+
+/** Région des Cloud Functions, partagée par le serveur et le client. */
+export const FUNCTIONS_REGION = 'europe-west1';
