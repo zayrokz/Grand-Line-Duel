@@ -23,18 +23,18 @@ tests et les interprétations de règles retenues. Il est la référence pour re
 
 ### Choix et justifications
 
-| Choix | Justification |
-| --- | --- |
-| **Monorepo npm workspaces** (`engine`, `functions`, `web`) | Un seul dépôt, un seul `npm ci`, le moteur est partagé sans publication. Pas besoin d'outil supplémentaire (Nx, Turborepo) pour trois paquets. |
-| **Moteur « juste-à-temps »** (`main` pointe vers `src/index.ts`) | Pas d'étape de build pour `engine` : Vite (web), esbuild (functions) et Vitest compilent directement le TypeScript. Moins de configuration, aucun risque de `dist` périmé. |
-| **État séparé `pub` / `sec`** dans le moteur | Le moteur manipule un `GameState = { pub, sec }`. `pub` est exactement ce qui est publié aux deux joueurs ; `sec` (ordre des paquets, sac, graine, cartes réservées) ne quitte jamais le serveur. La séparation est structurelle, pas un filtrage après coup. |
-| **Hasard par graine** (mulberry32, état 32 bits dans `sec.rng`) | `applyMove` est pur et rejouable ; la graine est tirée par le serveur avec `crypto.randomInt` et n'est jamais exposée. |
-| **Cloud Functions callables (v2)** | Authentification et App Check vérifiés par le SDK, sérialisation simple, pas d'API REST à maintenir. Région `europe-west1` (joueurs francophones). |
-| **Bundle esbuild des Functions** | Cloud Build ne sait pas résoudre une dépendance de workspace (`@gld/engine`). Le build produit `packages/functions/dist/` (code bundlé + `package.json` minimal) qui est la source déployée. |
-| **Firestore en lecture seule côté client** | Toutes les écritures passent par les Functions. Les règles sont `deny` par défaut et n'autorisent que des lectures ciblées. |
-| **React 19 + Vite + react-router** | Écosystème standard, rapide, PWA via `vite-plugin-pwa`. Pas de gestionnaire d'état global : l'état de jeu vient de Firestore, quelques hooks suffisent. |
-| **CSS natif avec variables** | Thème centralisé (`src/theme.css` + `src/theme.ts`), aucune dépendance UI, animations CSS légères. |
-| **Vitest** | Même outil pour le moteur et les tests d'intégration sur émulateur, support natif de TypeScript/ESM. |
+| Choix                                                            | Justification                                                                                                                                                                                                                                                 |
+| ---------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Monorepo npm workspaces** (`engine`, `functions`, `web`)       | Un seul dépôt, un seul `npm ci`, le moteur est partagé sans publication. Pas besoin d'outil supplémentaire (Nx, Turborepo) pour trois paquets.                                                                                                                |
+| **Moteur « juste-à-temps »** (`main` pointe vers `src/index.ts`) | Pas d'étape de build pour `engine` : Vite (web), esbuild (functions) et Vitest compilent directement le TypeScript. Moins de configuration, aucun risque de `dist` périmé.                                                                                    |
+| **État séparé `pub` / `sec`** dans le moteur                     | Le moteur manipule un `GameState = { pub, sec }`. `pub` est exactement ce qui est publié aux deux joueurs ; `sec` (ordre des paquets, sac, graine, cartes réservées) ne quitte jamais le serveur. La séparation est structurelle, pas un filtrage après coup. |
+| **Hasard par graine** (mulberry32, état 32 bits dans `sec.rng`)  | `applyMove` est pur et rejouable ; la graine est tirée par le serveur avec `crypto.randomInt` et n'est jamais exposée.                                                                                                                                        |
+| **Cloud Functions callables (v2)**                               | Authentification et App Check vérifiés par le SDK, sérialisation simple, pas d'API REST à maintenir. Région `europe-west1` (joueurs francophones).                                                                                                            |
+| **Bundle esbuild des Functions**                                 | Cloud Build ne sait pas résoudre une dépendance de workspace (`@gld/engine`). Le build produit `packages/functions/dist/` (code bundlé + `package.json` minimal) qui est la source déployée.                                                                  |
+| **Firestore en lecture seule côté client**                       | Toutes les écritures passent par les Functions. Les règles sont `deny` par défaut et n'autorisent que des lectures ciblées.                                                                                                                                   |
+| **React 19 + Vite + react-router**                               | Écosystème standard, rapide, PWA via `vite-plugin-pwa`. Pas de gestionnaire d'état global : l'état de jeu vient de Firestore, quelques hooks suffisent.                                                                                                       |
+| **CSS natif avec variables**                                     | Thème centralisé (`src/theme.css` + `src/theme.ts`), aucune dépendance UI, animations CSS légères.                                                                                                                                                            |
+| **Vitest**                                                       | Même outil pour le moteur et les tests d'intégration sur émulateur, support natif de TypeScript/ESM.                                                                                                                                                          |
 
 ## 2. Arborescence
 
@@ -84,15 +84,15 @@ tests et les interprétations de règles retenues. Il est la référence pour re
 
 Toutes les écritures sont faites par les Cloud Functions (SDK Admin). Le client ne fait que lire.
 
-| Chemin | Contenu | Lecture client |
-| --- | --- | --- |
-| `users/{uid}` | `nickname`, `avatar`, `stats {played, wins, losses, abandons}`, `currentGameId`, `createdAt`, `updatedAt` | propriétaire uniquement |
-| `users/{uid}/history/{gameId}` | `endedAt`, `opponent {nickname, avatar}`, `result` (`win`/`loss`), `reason`, `myPoints`, `opponentPoints`, `turns` | propriétaire uniquement |
-| `games/{gameId}` | salon + partie publique (voir ci-dessous) | joueurs du salon uniquement |
-| `games/{gameId}/private/{uid}` | `reserved: string[]` — cartes réservées du joueur | ce joueur uniquement |
-| `gameSecrets/{gameId}` | `sec` : graine, paquets ordonnés, sac, cartes réservées des deux joueurs | **jamais** |
-| `roomCodes/{code}` | `gameId`, `createdAt` | **jamais** (rejoindre passe par une Function) |
-| `rateLimits/{uid}` | compteurs de limitation de débit | **jamais** |
+| Chemin                         | Contenu                                                                                                            | Lecture client                                |
+| ------------------------------ | ------------------------------------------------------------------------------------------------------------------ | --------------------------------------------- |
+| `users/{uid}`                  | `nickname`, `avatar`, `stats {played, wins, losses, abandons}`, `currentGameId`, `createdAt`, `updatedAt`          | propriétaire uniquement                       |
+| `users/{uid}/history/{gameId}` | `endedAt`, `opponent {nickname, avatar}`, `result` (`win`/`loss`), `reason`, `myPoints`, `opponentPoints`, `turns` | propriétaire uniquement                       |
+| `games/{gameId}`               | salon + partie publique (voir ci-dessous)                                                                          | joueurs du salon uniquement                   |
+| `games/{gameId}/private/{uid}` | `reserved: string[]` — cartes réservées du joueur                                                                  | ce joueur uniquement                          |
+| `gameSecrets/{gameId}`         | `sec` : graine, paquets ordonnés, sac, cartes réservées des deux joueurs                                           | **jamais**                                    |
+| `roomCodes/{code}`             | `gameId`, `createdAt`                                                                                              | **jamais** (rejoindre passe par une Function) |
+| `rateLimits/{uid}`             | compteurs de limitation de débit                                                                                   | **jamais**                                    |
 
 ### Document `games/{gameId}`
 
@@ -126,16 +126,16 @@ tour, décisions en attente, vainqueur, journal structuré.
 
 ## 4. API serveur (callables, région `europe-west1`)
 
-| Function | Entrée | Effet |
-| --- | --- | --- |
-| `saveProfile` | `{ nickname, avatar }` | crée/met à jour le profil (pseudo assaini) |
-| `createRoom` | `{}` | crée un salon `waiting` + code ; renvoie le salon existant si l'hôte en a déjà un |
-| `joinRoom` | `{ code }` | rejoint un salon, démarre la partie (premier joueur tiré au sort) ; refuse si plein |
-| `submitMove` | `{ gameId, move, expectedVersion, moveId }` | valide et applique un coup dans une transaction |
-| `leaveGame` | `{ gameId }` | annule un salon en attente, ou abandonne une partie en cours |
-| `claimTimeout` | `{ gameId }` | l'adversaire réclame la victoire quand le délai du joueur actif est dépassé |
-| `requestRematch` | `{ gameId }` | demande de revanche ; nouvelle partie quand les deux joueurs l'ont demandée |
-| `cleanupGames` (planifiée) | — | expire les salons en attente et clôt les parties abandonnées |
+| Function                   | Entrée                                      | Effet                                                                               |
+| -------------------------- | ------------------------------------------- | ----------------------------------------------------------------------------------- |
+| `saveProfile`              | `{ nickname, avatar }`                      | crée/met à jour le profil (pseudo assaini)                                          |
+| `createRoom`               | `{}`                                        | crée un salon `waiting` + code ; renvoie le salon existant si l'hôte en a déjà un   |
+| `joinRoom`                 | `{ code }`                                  | rejoint un salon, démarre la partie (premier joueur tiré au sort) ; refuse si plein |
+| `submitMove`               | `{ gameId, move, expectedVersion, moveId }` | valide et applique un coup dans une transaction                                     |
+| `leaveGame`                | `{ gameId }`                                | annule un salon en attente, ou abandonne une partie en cours                        |
+| `claimTimeout`             | `{ gameId }`                                | l'adversaire réclame la victoire quand le délai du joueur actif est dépassé         |
+| `requestRematch`           | `{ gameId }`                                | demande de revanche ; nouvelle partie quand les deux joueurs l'ont demandée         |
+| `cleanupGames` (planifiée) | —                                           | expire les salons en attente et clôt les parties abandonnées                        |
 
 Chaque callable : App Check imposé (hors émulateur), authentification requise, entrée validée par
 Zod, limitation de débit transactionnelle, erreurs `HttpsError` avec un code stable que le client
