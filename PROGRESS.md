@@ -47,13 +47,34 @@ Fichier de suivi pour reprendre le travail d'une session à l'autre.
   prises de jetons, achat d'une carte joker → couleur → carte Empereur → vol, défausse, victoire,
   revanche, historique ; aucune erreur console.
 
+- CI/CD GitHub Actions (`.github/workflows/ci.yml`) : lint, format, typecheck, tests moteur, tests
+  émulateur (Java 21), build, puis déploiement Firebase sur `main` (environnement `production`).
+- PWA (`vite-plugin-pwa`) : manifeste, icônes 192/512/maskable, service worker (precache),
+  exclusion des URL `/__/` de Firebase.
+- En-têtes de sécurité dans `firebase.json` (CSP, HSTS, nosniff, X-Frame-Options, Referrer-Policy,
+  Permissions-Policy, COOP) vérifiés dans l'émulateur Hosting ; application testée sous la CSP
+  (aucune violation, y compris avec `style-src 'self'`). Cache : `no-cache` par défaut,
+  `immutable` pour `/assets/**`.
+- Durcissement du hasard : SHA-256 en mode compteur, graine de 256 bits (au lieu de 32 bits).
+- `README.md` (français), `docs/SECURITY.md` (revue de sécurité), `docs/ARCHITECTURE.md` à jour.
+
 ## En cours
 
-- CI/CD, PWA, en-têtes, README.
+- Rien : toutes les phases sont terminées.
 
-## À faire
+## À faire (côté propriétaire du projet)
 
-- Phase 5.
+- Créer le projet Firebase (plan Blaze), activer Auth (Anonyme, Google, e-mail), App Check
+  (reCAPTCHA Enterprise) et l'**appliquer à Firestore** dans la console ; renseigner les variables
+  et le secret GitHub (voir README).
+- Remplacer `packages/engine/data/cards.json` par la liste officielle si disponible.
+- Remplacer les placeholders visuels (emojis des cartes) par des illustrations originales.
+
+## Pistes (non demandées, non implémentées)
+
+- Épingler les actions GitHub par SHA, activer Dependabot.
+- Retirer `'unsafe-inline'` de `style-src` après vérification de reCAPTCHA en production.
+- Indicateur de présence de l'adversaire (aujourd'hui : délai de tour uniquement).
 
 ## Décisions prises
 
@@ -70,6 +91,14 @@ Fichier de suivi pour reprendre le travail d'une session à l'autre.
 - **Journal structuré** (`pub.log`, 300 entrées max) traduit en français par le client ; il ne
   contient jamais l'identité d'une carte réservée.
 
+- **Hasard** : SHA-256 en mode compteur sur une graine de 256 bits (`crypto.randomBytes`). Un PRNG à
+  graine 32 bits aurait permis de retrouver la graine par force brute à partir de la mise en place
+  publique, donc l'ordre des paquets.
+- **Pas de `predeploy` dans `firebase.json`** : un rebuild implicite pendant `firebase deploy`
+  produirait un client sans sa configuration ; le build est une étape explicite (`npm run deploy`, CI).
+- **Signatures du moteur** : `applyMove(state, seat, move)` (le siège est explicite pour vérifier
+  l'auteur du coup) et `getLegalMoves(view)` où `view = { pub, seat, reserved }` contient exactement
+  ce que sait le joueur — utilisable tel quel côté client.
 - **Toutes les écritures Firestore via les Functions** : les règles n'autorisent que des lectures.
 - **Quota consommé même en cas de refus** (`runLimited`) : un script ne peut pas marteler des coups
   illégaux ou deviner des codes de salon. Convention : un handler vérifie tout avant d'écrire.

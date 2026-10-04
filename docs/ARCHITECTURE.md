@@ -23,18 +23,18 @@ tests et les interprétations de règles retenues. Il est la référence pour re
 
 ### Choix et justifications
 
-| Choix                                                            | Justification                                                                                                                                                                                                                                                 |
-| ---------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Monorepo npm workspaces** (`engine`, `functions`, `web`)       | Un seul dépôt, un seul `npm ci`, le moteur est partagé sans publication. Pas besoin d'outil supplémentaire (Nx, Turborepo) pour trois paquets.                                                                                                                |
-| **Moteur « juste-à-temps »** (`main` pointe vers `src/index.ts`) | Pas d'étape de build pour `engine` : Vite (web), esbuild (functions) et Vitest compilent directement le TypeScript. Moins de configuration, aucun risque de `dist` périmé.                                                                                    |
-| **État séparé `pub` / `sec`** dans le moteur                     | Le moteur manipule un `GameState = { pub, sec }`. `pub` est exactement ce qui est publié aux deux joueurs ; `sec` (ordre des paquets, sac, graine, cartes réservées) ne quitte jamais le serveur. La séparation est structurelle, pas un filtrage après coup. |
-| **Hasard par graine** (mulberry32, état 32 bits dans `sec.rng`)  | `applyMove` est pur et rejouable ; la graine est tirée par le serveur avec `crypto.randomInt` et n'est jamais exposée.                                                                                                                                        |
-| **Cloud Functions callables (v2)**                               | Authentification et App Check vérifiés par le SDK, sérialisation simple, pas d'API REST à maintenir. Région `europe-west1` (joueurs francophones).                                                                                                            |
-| **Bundle esbuild des Functions**                                 | Cloud Build ne sait pas résoudre une dépendance de workspace (`@gld/engine`). Le build produit `packages/functions/dist/` (code bundlé + `package.json` minimal) qui est la source déployée.                                                                  |
-| **Firestore en lecture seule côté client**                       | Toutes les écritures passent par les Functions. Les règles sont `deny` par défaut et n'autorisent que des lectures ciblées.                                                                                                                                   |
-| **React 19 + Vite + react-router**                               | Écosystème standard, rapide, PWA via `vite-plugin-pwa`. Pas de gestionnaire d'état global : l'état de jeu vient de Firestore, quelques hooks suffisent.                                                                                                       |
-| **CSS natif avec variables**                                     | Thème centralisé (`src/theme.css` + `src/theme.ts`), aucune dépendance UI, animations CSS légères.                                                                                                                                                            |
-| **Vitest**                                                       | Même outil pour le moteur et les tests d'intégration sur émulateur, support natif de TypeScript/ESM.                                                                                                                                                          |
+| Choix                                                                               | Justification                                                                                                                                                                                                                                                   |
+| ----------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Monorepo npm workspaces** (`engine`, `functions`, `web`)                          | Un seul dépôt, un seul `npm ci`, le moteur est partagé sans publication. Pas besoin d'outil supplémentaire (Nx, Turborepo) pour trois paquets.                                                                                                                  |
+| **Moteur « juste-à-temps »** (`main` pointe vers `src/index.ts`)                    | Pas d'étape de build pour `engine` : Vite (web), esbuild (functions) et Vitest compilent directement le TypeScript. Moins de configuration, aucun risque de `dist` périmé.                                                                                      |
+| **État séparé `pub` / `sec`** dans le moteur                                        | Le moteur manipule un `GameState = { pub, sec }`. `pub` est exactement ce qui est publié aux deux joueurs ; `sec` (ordre des paquets, sac, graine, cartes réservées) ne quitte jamais le serveur. La séparation est structurelle, pas un filtrage après coup.   |
+| **Hasard par graine** (SHA-256 en mode compteur, graine de 256 bits dans `sec.rng`) | `applyMove` est pur et rejouable ; la graine est tirée par le serveur avec `crypto.randomBytes` et n'est jamais exposée. Un PRNG 32 bits a été écarté : la mise en place publique permettrait de retrouver la graine par force brute (voir `docs/SECURITY.md`). |
+| **Cloud Functions callables (v2)**                                                  | Authentification et App Check vérifiés par le SDK, sérialisation simple, pas d'API REST à maintenir. Région `europe-west1` (joueurs francophones).                                                                                                              |
+| **Bundle esbuild des Functions**                                                    | Cloud Build ne sait pas résoudre une dépendance de workspace (`@gld/engine`). Le build produit `packages/functions/dist/` (code bundlé + `package.json` minimal) qui est la source déployée.                                                                    |
+| **Firestore en lecture seule côté client**                                          | Toutes les écritures passent par les Functions. Les règles sont `deny` par défaut et n'autorisent que des lectures ciblées.                                                                                                                                     |
+| **React 19 + Vite + react-router**                                                  | Écosystème standard, rapide, PWA via `vite-plugin-pwa`. Pas de gestionnaire d'état global : l'état de jeu vient de Firestore, quelques hooks suffisent.                                                                                                         |
+| **CSS natif avec variables**                                                        | Thème centralisé (`src/theme.css` + `src/theme.ts`), aucune dépendance UI, animations CSS légères.                                                                                                                                                              |
+| **Vitest**                                                                          | Même outil pour le moteur et les tests d'intégration sur émulateur, support natif de TypeScript/ESM.                                                                                                                                                            |
 
 ## 2. Arborescence
 
@@ -42,6 +42,7 @@ tests et les interprétations de règles retenues. Il est la référence pour re
 .
 ├── .github/workflows/ci.yml        # lint, typecheck, tests, émulateur, build, déploiement
 ├── docs/ARCHITECTURE.md            # ce document
+├── docs/SECURITY.md                # revue de sécurité (menaces → parades)
 ├── PROGRESS.md                     # suivi des phases et décisions
 ├── README.md                       # guide d'installation et de déploiement (FR)
 ├── firebase.json                   # hosting (en-têtes de sécurité), functions, firestore, émulateurs
@@ -56,13 +57,14 @@ tests et les interprétations de règles retenues. Il est la référence pour re
     │   │   ├── types.ts            # types du domaine, coups, état, journal
     │   │   ├── schema.ts           # schémas Zod (données de cartes, coups)
     │   │   ├── cards.ts            # chargement/validation des données
-    │   │   ├── rng.ts              # PRNG déterministe
+    │   │   ├── rng.ts              # PRNG déterministe (SHA-256 en mode compteur)
     │   │   ├── board.ts            # plateau 5×5, spirale, lignes
     │   │   ├── player.ts           # bonus, couronnes, points, paiement
     │   │   ├── setup.ts            # mise en place
     │   │   ├── rules.ts            # légalité : validateMove / getLegalMoves
     │   │   ├── apply.ts            # applyMove, fin de tour, victoire, abandon
     │   │   ├── view.ts             # projections publiques / joueur
+    │   │   ├── protocol.ts         # contrat client/serveur : documents, erreurs, validation
     │   │   └── index.ts
     │   └── test/                   # tests unitaires et parties aléatoires
     ├── functions/
@@ -178,3 +180,14 @@ traduit en français.
 Voir la section « Décisions » de `PROGRESS.md` (tenue à jour) : gain de Log Pose quand la réserve
 est vide, joker sans carte à bonus, tours supplémentaires non cumulables, ordre de résolution
 capacité → cartes Empereur → défausse → victoire, paiement automatique, coup « passer » de secours.
+
+## 7. Déroulé d'un coup
+
+1. Le client calcule les coups légaux avec `getLegalMoves(vue)` et n'active que ceux-ci.
+2. Il appelle `submitMove({ gameId, move, expectedVersion, moveId })` (App Check + jeton Auth).
+3. La Function, dans une transaction : limite de débit → lecture de `games/{id}` et
+   `gameSecrets/{id}` → idempotence (`lastMove.id`) → statut, version, tour → `applyMove` →
+   écriture de l'état public, des secrets, des réserves privées modifiées, du délai de tour et, en
+   fin de partie, des statistiques et de l'historique des deux joueurs.
+4. Les deux clients reçoivent le nouvel état par `onSnapshot` ; la sélection locale, indexée par
+   version, se réinitialise.
