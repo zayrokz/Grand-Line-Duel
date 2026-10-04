@@ -69,8 +69,9 @@ export function RulesPage() {
           rapporte 1 ressource au choix sur le plateau (jamais de {RESOURCES.gold.name}).
         </li>
         <li>
-          <strong>Remplir le plateau</strong> (si le sac n’est pas vide) : tous les jetons du sac
-          sont replacés en spirale depuis le centre. Ton adversaire reçoit 1 {TERMS.privilege}.
+          <strong>Remplir le plateau</strong> (si le sac n’est pas vide) : touche le sac, en bas à
+          gauche ; tous ses jetons sont replacés en spirale depuis le centre. Ton adversaire reçoit
+          1 {TERMS.privilege}.
         </li>
       </ol>
       <h3>Action obligatoire (une seule)</h3>

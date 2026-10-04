@@ -3,6 +3,7 @@ import type { ReactNode } from 'react';
 import { getLegalMoves } from '@gld/engine';
 import type { GameDoc, Move, PlayerView, Seat } from '@gld/engine';
 import { api, errorMessage } from '../api';
+import { Bag } from '../components/Bag';
 import { Board } from '../components/Board';
 import { RoyalView } from '../components/Cards';
 import { CardSheet } from '../components/CardSheet';
@@ -14,6 +15,7 @@ import { PlayerPanel } from '../components/PlayerPanel';
 import { Pyramid } from '../components/Pyramid';
 import { useToast } from '../components/Toast';
 import { Treasure } from '../components/Treasure';
+import { useBagAnimation } from '../hooks/useBagAnimation';
 import { useMoveSender } from '../hooks/useMoveSender';
 import { useNow } from '../hooks/useNow';
 import { ICONS, RESOURCES, TERMS } from '../theme';
@@ -78,6 +80,7 @@ export function GameView({ gameId, game, reserved, uid }: Props) {
 
   const onError = useCallback((message: string) => toast(message), [toast]);
   const { send, busy } = useMoveSender(gameId, game.version, onError);
+  const bagAnimation = useBagAnimation(pub.board, pub.bagCount);
   const play = (move: Move) => {
     setSheet(null);
     void send(move);
@@ -174,6 +177,19 @@ export function GameView({ gameId, game, reserved, uid }: Props) {
   const remaining = deadline !== null ? deadline - now : null;
   const timer = playing && remaining !== null ? formatTime(remaining) : null;
   const canClaim = playing && !myTurn && remaining !== null && remaining <= 0;
+
+  /** Toucher le sac : remplit le plateau si c'est permis, sinon explique pourquoi. */
+  function onBag() {
+    if (mainPhase && canReplenish && !busy) {
+      play({ type: 'replenish' });
+      return;
+    }
+    const count = `Le sac contient ${pub.bagCount} jeton${pub.bagCount > 1 ? 's' : ''}.`;
+    if (pub.bagCount === 0) toast('Le sac est vide : rien à remettre sur le plateau.', 'info');
+    else if (!myTurn) toast(`${count} Tu pourras remplir le plateau pendant ton tour.`, 'info');
+    else if (pub.flags.replenished) toast('Le plateau a déjà été rempli ce tour-ci.', 'info');
+    else toast(`${count} Termine d’abord la décision en cours.`, 'info');
+  }
 
   async function claim() {
     try {
@@ -280,17 +296,12 @@ export function GameView({ gameId, game, reserved, uid }: Props) {
       <div className="action-row">
         <p className="hint">
           <strong>À toi de jouer{timer && ` · ${timer}`}</strong> — touche des jetons à prendre ou
-          une carte à recruter/réserver.
+          une carte à recruter/réserver{canReplenish && ', ou le sac pour remplir le plateau'}.
         </p>
         {canUsePrivileges && (
           <button className="secondary" onClick={() => startPrivileges()}>
             <img src={ICONS.privilege} alt="" className="inline-icon" /> Utiliser {TERMS.privilege}{' '}
             ({me.privileges})
-          </button>
-        )}
-        {canReplenish && (
-          <button className="secondary" disabled={busy} onClick={() => play({ type: 'replenish' })}>
-            Remplir le plateau ({pub.bagCount})
           </button>
         )}
         {canPass && (
@@ -352,7 +363,6 @@ export function GameView({ gameId, game, reserved, uid }: Props) {
               Réserve : <img src={ICONS.privilege} alt={TERMS.privileges} className="inline-icon" />{' '}
               ×{pub.privileges}
             </span>
-            <span title="Jetons dans le sac">👝 {pub.bagCount}</span>
           </div>
         </div>
 
@@ -366,7 +376,14 @@ export function GameView({ gameId, game, reserved, uid }: Props) {
         </div>
 
         <div className="area-board">
-          <Board board={pub.board} selectable={selectable} selected={selected} onCell={onCell} />
+          <Board
+            ref={bagAnimation.boardRef}
+            board={pub.board}
+            selectable={selectable}
+            selected={selected}
+            onCell={onCell}
+            hidden={bagAnimation.hiddenCells}
+          />
         </div>
 
         <div className="area-me">
@@ -389,7 +406,18 @@ export function GameView({ gameId, game, reserved, uid }: Props) {
       </div>
 
       <div className={`action-bar ${myTurn ? 'my-turn' : ''}`} aria-busy={busy}>
-        {actionBar}
+        <div className="action-bar-inner">
+          <Bag
+            ref={bagAnimation.bagRef}
+            count={pub.bagCount}
+            open={bagAnimation.bagOpen}
+            shaking={bagAnimation.shaking}
+            bounceKey={bagAnimation.bounceKey}
+            canRefill={mainPhase && canReplenish && !busy}
+            onClick={onBag}
+          />
+          <div className="action-content">{actionBar}</div>
+        </div>
       </div>
 
       {sheet && (

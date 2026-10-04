@@ -183,6 +183,7 @@ App Check. Seule la clé du compte de service est secrète. Aucun secret n'est p
 | Illustration d'une carte                    | déposer `packages/web/src/assets/cards/<id>.webp` (ou png, jpg, svg) — ex. `L2-07.webp`  |
 | Illustration d'une carte Empereur           | `packages/web/src/assets/royals/R-1.webp` … `R-4.webp`                                   |
 | Nom, type et emoji des cartes               | `packages/web/src/theme.ts` (`FAMILIES` + `COLOR_EPITHETS`, `CARD_NAMES`, `ROYAL_THEME`) |
+| Sac (pioche) fermé / ouvert                 | `packages/web/src/assets/bag/bag-closed.webp`, `bag-open.webp` (fond transparent)        |
 | Icônes PWA / favicon                        | `packages/web/public/` (`favicon.svg`, `icons/*.png`)                                    |
 
 Une image déposée remplace automatiquement le placeholder (emoji) de la carte, sans autre
