@@ -78,39 +78,27 @@
 }
 
 /* ---------- Jeton ---------- */
+/* Le jeton est un SVG complet (cerclage bois, face, picto, épaisseur) : tokens/token-RESSOURCE.svg.
+   Le bouton ne porte que les états. */
 .token {
-  --face: var(--res-rhum);
-  --edge: var(--res-rhum-edge);
-  --size: 46px;
+  --size: 50px;
   position: relative;
-  display: grid;
-  place-items: center;
+  display: block;
   width: var(--size);
   height: var(--size);
   padding: 0;
-  border: var(--outline) solid var(--color-ink);
+  border: none;
   border-radius: 50%;
-  background: var(--face);
-  box-shadow:
-    inset 0 4px 0 rgb(255 255 255 / 0.4),
-    0 var(--edge-height-sm) 0 var(--edge),
-    0 calc(var(--edge-height-sm) + 2px) 0 var(--color-ink);
+  background: none;
   transition:
     transform var(--dur-base) var(--ease-bounce),
     opacity var(--dur-fast) linear;
   cursor: pointer;
 }
-.token::before {
-  /* cerclage pointillé du jeton */
-  content: '';
-  position: absolute;
-  inset: 4px;
-  border: 2px dashed rgb(42 26 20 / 0.35);
-  border-radius: 50%;
-}
 .token > img {
-  width: 55%;
-  height: 55%;
+  display: block;
+  width: 100%;
+  height: 100%;
 }
 .token:hover {
   transform: translateY(-3px);
@@ -119,7 +107,7 @@
   /* sélectionné sur le plateau */
   transform: translateY(-8px);
   outline: var(--outline-thick) solid var(--color-primary);
-  outline-offset: 3px;
+  outline-offset: 0;
 }
 .token:disabled,
 .token[aria-disabled='true'] {
@@ -128,33 +116,128 @@
   cursor: not-allowed;
 }
 
-.token[data-res='provisions'] {
-  --face: var(--res-provisions);
-  --edge: var(--res-provisions-edge);
-}
-.token[data-res='carte'] {
-  --face: var(--res-carte);
-  --edge: var(--res-carte-edge);
-}
-.token[data-res='bois'] {
-  --face: var(--res-bois);
-  --edge: var(--res-bois-edge);
-}
-.token[data-res='rhum'] {
+/* ---------- Pastille (moins de 26 px : coûts, journal) ---------- */
+.pip {
   --face: var(--res-rhum);
-  --edge: var(--res-rhum-edge);
+  display: inline-grid;
+  place-items: center;
+  width: 22px;
+  height: 22px;
+  box-sizing: border-box;
+  border: var(--outline-thin) solid var(--color-ink);
+  border-radius: 50%;
+  background: var(--face);
 }
-.token[data-res='poudre'] {
+.pip > img {
+  width: 64%;
+  height: 64%;
+}
+.pip[data-res='provisions'] {
+  --face: var(--res-provisions);
+}
+.pip[data-res='carte'] {
+  --face: var(--res-carte);
+}
+.pip[data-res='bois'] {
+  --face: var(--res-bois);
+}
+.pip[data-res='rhum'] {
+  --face: var(--res-rhum);
+}
+.pip[data-res='poudre'] {
   --face: var(--res-poudre);
-  --edge: var(--res-poudre-edge);
 }
-.token[data-res='fruit'] {
+.pip[data-res='fruit'] {
   --face: var(--res-fruit);
-  --edge: var(--res-fruit-edge);
 }
-.token[data-res='or'] {
+.pip[data-res='or'] {
   --face: var(--res-or);
-  --edge: var(--res-or-edge);
+}
+
+/* ---------- Carte ---------- */
+/* Cadre bois, bandeau à la couleur du bonus, fanion des points, médaillon de bonus,
+   illustration sur parchemin, coûts empilés en bas à gauche. */
+.card {
+  --band: var(--res-aucun);
+  --ribbon: var(--res-aucun-edge);
+  position: relative;
+  width: 110px;
+  height: 168px;
+  box-sizing: border-box;
+  padding: 4px;
+  border: var(--outline) solid var(--color-ink);
+  border-radius: var(--radius-card);
+  background: var(--color-card-wood);
+  box-shadow:
+    inset 0 2px 0 var(--color-card-wood-light),
+    0 var(--edge-height-md) 0 var(--color-card-wood-edge),
+    0 calc(var(--edge-height-md) + var(--outline)) 0 var(--color-ink);
+}
+.card__inner {
+  position: relative;
+  height: 100%;
+  box-sizing: border-box;
+  border: 2px solid var(--color-card-wood-edge);
+  border-radius: 8px;
+  background: var(--color-card-parchment);
+  overflow: hidden;
+}
+.card__band {
+  position: absolute;
+  inset: 0 0 auto;
+  height: 38px;
+  border-bottom: 2.5px solid var(--color-ink);
+  background: var(--band);
+  box-shadow: inset 0 3px 0 rgb(255 255 255 / 0.28);
+}
+.card__medal {
+  position: absolute;
+  top: 9px;
+  right: 9px;
+  display: grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  box-sizing: border-box;
+  border: 2.5px solid var(--color-ink);
+  border-radius: 50%;
+  background: var(--color-surface);
+  box-shadow: 0 2px 0 var(--color-ink);
+}
+.card__cost-number {
+  /* fond = tranche de la ressource (crème pour Provisions), chiffre crème ou encre */
+  display: grid;
+  place-items: center;
+  width: 24px;
+  height: 24px;
+  box-sizing: border-box;
+  border: 2.5px solid var(--color-ink);
+  border-radius: 50%;
+  font: 400 15px/1 var(--font-display);
+}
+.card[data-bonus='provisions'] {
+  --band: var(--res-provisions);
+  --ribbon: var(--res-provisions-edge);
+}
+.card[data-bonus='carte'] {
+  --band: var(--res-carte);
+  --ribbon: var(--res-carte-edge);
+}
+.card[data-bonus='bois'] {
+  --band: var(--res-bois);
+  --ribbon: var(--res-bois-edge);
+}
+.card[data-bonus='rhum'] {
+  --band: var(--res-rhum);
+  --ribbon: var(--res-rhum-edge);
+}
+.card[data-bonus='poudre'] {
+  --band: var(--res-poudre);
+  --ribbon: var(--res-poudre-edge);
+}
+.card[data-bonus='fruit'] {
+  --band: var(--res-fruit);
+  --ribbon: var(--res-fruit-edge);
 }
 
 /* ---------- Panneau parchemin (réutilisable) ---------- */

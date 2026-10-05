@@ -6,17 +6,18 @@ Rien ici n'est encore branché dans l'application : ce dossier sert de source po
 
 ## Fichiers
 
-| Fichier / dossier       | Contenu                                                                                                                                                                                                                                                                          |
-| ----------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `tokens.css`            | Variables CSS : couleurs (fonds, surfaces, accents, 7 ressources, niveaux), typographie, espacements, rayons, contours, hauteurs de tranche, mouvement.                                                                                                                          |
-| `components.css`        | Recette « 3D sans ombre » : `.btn` (primaire, secondaire, danger, fantôme, désactivé, pressé), `.token` (7 ressources, survol, sélectionné, désactivé), `.panel`, animations (jeton vers le joueur, sac qui tremble, carte qui se retourne) et version `prefers-reduced-motion`. |
-| `icons/resources/`      | Glyphes des 7 ressources, à poser sur le disque coloré du jeton.                                                                                                                                                                                                                 |
-| `icons/game/`           | Log Pose, Prime, Renommée, sac, Trésor, bonus polyvalent, roue (logo).                                                                                                                                                                                                           |
-| `icons/abilities/`      | Rejouer, Abordage, Ravitaillement, Polyvalent (la capacité Log Pose réutilise `icon-logpose.svg`).                                                                                                                                                                               |
-| `icons/ui/`             | Icônes d'interface (menu, journal, règles, copier, partager, valider, fermer, retour, attente, modifier, retirer, voir, profil, revanche, port) et statistiques (parties, défaites, abandons).                                                                                   |
-| `illustrations/cards/`  | Illustrations de cartes 80 × 64.                                                                                                                                                                                                                                                 |
-| `illustrations/royals/` | Emblèmes des 4 cartes Empereur.                                                                                                                                                                                                                                                  |
-| `avatars/`              | Emblèmes de joueur 64 × 64.                                                                                                                                                                                                                                                      |
+| Fichier / dossier       | Contenu                                                                                                                                                                                                                                                                |
+| ----------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `tokens.css`            | Variables CSS : couleurs (fonds, surfaces, accents, 7 ressources, niveaux), typographie, espacements, rayons, contours, hauteurs de tranche, mouvement.                                                                                                                |
+| `components.css`        | Recette « 3D sans ombre » : `.btn` (primaire, secondaire, danger, fantôme, désactivé, pressé), `.token` (jeton SVG complet + états), `.pip` (pastille sous 26 px), `.card` (cadre bois, bandeau, médaillon), `.panel`, animations et version `prefers-reduced-motion`. |
+| `tokens/`               | Les 7 jetons complets (cerclage bois à lattes et rivets, face colorée, picto en relief, épaisseur ; cerclage doré pour le Berry). À utiliser à partir de 26 px.                                                                                                        |
+| `icons/resources/`      | Pictogrammes des 7 ressources pour les pastilles (coûts, journal) : sac en toile, carte roulée, trois bûches, bouteille, bombe noire, fruit tacheté, pièce à ancre.                                                                                                    |
+| `icons/game/`           | Log Pose, Prime, Renommée, sac, Trésor, bonus polyvalent, roue (logo).                                                                                                                                                                                                 |
+| `icons/abilities/`      | Rejouer, Abordage, Ravitaillement, Polyvalent (la capacité Log Pose réutilise `icon-logpose.svg`).                                                                                                                                                                     |
+| `icons/ui/`             | Icônes d'interface (menu, journal, règles, copier, partager, valider, fermer, retour, attente, modifier, retirer, voir, profil, revanche, port) et statistiques (parties, défaites, abandons).                                                                         |
+| `illustrations/cards/`  | Illustrations de cartes 80 × 64.                                                                                                                                                                                                                                       |
+| `illustrations/royals/` | Emblèmes des 4 cartes Empereur.                                                                                                                                                                                                                                        |
+| `avatars/`              | Emblèmes de joueur 64 × 64.                                                                                                                                                                                                                                            |
 
 Tous les SVG sont originaux : contour `#2A1A14`, aplats, aucun dégradé, aucun filtre.
 
@@ -72,6 +73,10 @@ Il manque encore des illustrations pour Mousse, Pavillon, Officier, Capitaine et
 ### Avatars (`AVATARS` de `theme.ts`)
 
 `parrot` → `avatar-perroquet`, `octopus` → `avatar-pieuvre`, `shark` → `avatar-requin`, `anchor` → `avatar-ancre`, `compass` → `avatar-boussole`, `skull` → `avatar-crane`, `crab` → `avatar-crabe`, `whale` → `avatar-baleine`, `turtle` → `avatar-tortue`. En attendant des avatars dédiés, `ship`, `map` et `sword` réutilisent `illo-galion`, `glyph-carte` et `illo-sabre`.
+
+## Cartes
+
+Format repris du visuel de référence : cadre en bois, bandeau à la couleur du bonus, fanion des points de Renommée en haut à gauche, médaillon du bonus en haut à droite (avec le picto de la ressource), capacité sous le médaillon, grande illustration sur parchemin, coûts empilés en bas à gauche (chiffre sur la tranche de la ressource + picto). Le nom n'est plus imprimé : il s'affiche au survol, dans la fiche détaillée sur mobile et dans l'`aria-label`.
 
 ## Règles du style
 
