@@ -1,0 +1,229 @@
+/* Grand Line Duel — recette « 3D sans ombre » : face + reflet net + tranche pleine + contour.
+   Aucun flou : chaque box-shadow a un rayon de flou de 0. Nécessite tokens.css. */
+
+/* ---------- Bouton ---------- */
+.btn {
+  --face: var(--color-primary);
+  --edge: var(--color-primary-edge);
+  --edge-h: var(--edge-height-md);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  min-height: 46px;
+  min-width: var(--hit-min);
+  padding: 0 var(--space-5);
+  border: var(--outline) solid var(--color-ink);
+  border-radius: var(--radius-lg);
+  background: var(--face);
+  color: var(--color-ink);
+  font: var(--weight-heavy) var(--text-md) / 1 var(--font-body);
+  box-shadow:
+    var(--gloss),
+    /* reflet */ 0 var(--edge-h) 0 var(--edge),
+    /* tranche */ 0 calc(var(--edge-h) + var(--outline)) 0 var(--color-ink); /* contour de la tranche */
+  transition:
+    transform var(--dur-fast) var(--ease-out),
+    box-shadow var(--dur-fast) var(--ease-out);
+  cursor: pointer;
+}
+.btn:hover {
+  transform: translateY(-2px);
+  box-shadow:
+    var(--gloss),
+    0 calc(var(--edge-h) + 2px) 0 var(--edge),
+    0 calc(var(--edge-h) + 2px + var(--outline)) 0 var(--color-ink);
+}
+/* La face descend sur sa tranche. */
+.btn:active,
+.btn[aria-pressed='true'] {
+  transform: translateY(var(--edge-h));
+  box-shadow:
+    var(--gloss),
+    0 0 0 var(--edge),
+    0 var(--outline) 0 var(--color-ink);
+}
+.btn:focus-visible {
+  outline: var(--outline) dashed var(--color-ink);
+  outline-offset: 4px;
+}
+.btn--secondary {
+  --face: var(--color-surface-raised);
+  --edge: var(--color-surface-edge);
+}
+.btn--danger {
+  --face: var(--color-accent);
+  --edge: var(--color-accent-edge);
+}
+.btn--ghost {
+  background: none;
+  border-color: transparent;
+  box-shadow: none;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+.btn--ghost:hover,
+.btn--ghost:active {
+  transform: none;
+  box-shadow: none;
+}
+.btn:disabled {
+  --face: var(--color-disabled);
+  --edge: var(--color-disabled-edge);
+  border-color: var(--color-disabled-border);
+  color: var(--color-disabled-text);
+  box-shadow: 0 var(--edge-height-sm) 0 var(--edge);
+  transform: none;
+  cursor: not-allowed;
+}
+
+/* ---------- Jeton ---------- */
+.token {
+  --face: var(--res-rhum);
+  --edge: var(--res-rhum-edge);
+  --size: 46px;
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: var(--size);
+  height: var(--size);
+  padding: 0;
+  border: var(--outline) solid var(--color-ink);
+  border-radius: 50%;
+  background: var(--face);
+  box-shadow:
+    inset 0 4px 0 rgb(255 255 255 / 0.4),
+    0 var(--edge-height-sm) 0 var(--edge),
+    0 calc(var(--edge-height-sm) + 2px) 0 var(--color-ink);
+  transition:
+    transform var(--dur-base) var(--ease-bounce),
+    opacity var(--dur-fast) linear;
+  cursor: pointer;
+}
+.token::before {
+  /* cerclage pointillé du jeton */
+  content: '';
+  position: absolute;
+  inset: 4px;
+  border: 2px dashed rgb(42 26 20 / 0.35);
+  border-radius: 50%;
+}
+.token > img {
+  width: 55%;
+  height: 55%;
+}
+.token:hover {
+  transform: translateY(-3px);
+}
+.token[aria-pressed='true'] {
+  /* sélectionné sur le plateau */
+  transform: translateY(-8px);
+  outline: var(--outline-thick) solid var(--color-primary);
+  outline-offset: 3px;
+}
+.token:disabled,
+.token[aria-disabled='true'] {
+  opacity: 0.45;
+  transform: none;
+  cursor: not-allowed;
+}
+
+.token[data-res='provisions'] {
+  --face: var(--res-provisions);
+  --edge: var(--res-provisions-edge);
+}
+.token[data-res='carte'] {
+  --face: var(--res-carte);
+  --edge: var(--res-carte-edge);
+}
+.token[data-res='bois'] {
+  --face: var(--res-bois);
+  --edge: var(--res-bois-edge);
+}
+.token[data-res='rhum'] {
+  --face: var(--res-rhum);
+  --edge: var(--res-rhum-edge);
+}
+.token[data-res='poudre'] {
+  --face: var(--res-poudre);
+  --edge: var(--res-poudre-edge);
+}
+.token[data-res='fruit'] {
+  --face: var(--res-fruit);
+  --edge: var(--res-fruit-edge);
+}
+.token[data-res='or'] {
+  --face: var(--res-or);
+  --edge: var(--res-or-edge);
+}
+
+/* ---------- Panneau parchemin (réutilisable) ---------- */
+.panel {
+  border: var(--outline) solid var(--color-ink);
+  border-radius: var(--radius-xl);
+  background: var(--color-surface);
+  box-shadow:
+    0 var(--edge-height-lg) 0 var(--color-surface-edge),
+    0 calc(var(--edge-height-lg) + var(--outline)) 0 var(--color-ink);
+}
+
+/* ---------- Micro-animations ---------- */
+/* Jeton pris : glisse vers le panneau du joueur (--dx / --dy calculés en JS). */
+@keyframes token-to-player {
+  60% {
+    opacity: 1;
+  }
+  to {
+    transform: translate(var(--dx), var(--dy)) scale(0.7);
+    opacity: 0;
+  }
+}
+.token--leaving {
+  animation: token-to-player var(--dur-slow) var(--ease-out) forwards;
+}
+
+/* Sac : tremble au remplissage. */
+@keyframes bag-shake {
+  25% {
+    transform: rotate(-6deg);
+  }
+  50% {
+    transform: rotate(5deg);
+  }
+  75% {
+    transform: rotate(-3deg);
+  }
+}
+.bag--filling {
+  animation: bag-shake 280ms var(--ease-out);
+}
+
+/* Nouvelle carte : se retourne. */
+@keyframes card-flip {
+  from {
+    transform: rotateY(90deg);
+  }
+  to {
+    transform: rotateY(0deg);
+  }
+}
+.card--revealed {
+  animation: card-flip var(--dur-slow) var(--ease-out);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .btn,
+  .token {
+    transition: none;
+  }
+  .btn:hover,
+  .token:hover,
+  .token[aria-pressed='true'] {
+    transform: none;
+  }
+  .token--leaving,
+  .bag--filling,
+  .card--revealed {
+    animation-duration: 1ms;
+  }
+}
