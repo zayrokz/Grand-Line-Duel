@@ -1,11 +1,4 @@
-import {
-  computePayment,
-  effectiveCost,
-  findInPyramid,
-  getCard,
-  TAKEABLE_COLORS,
-  validateMove,
-} from '@gld/engine';
+import { findInPyramid, getCard, TAKEABLE_COLORS, validateMove } from '@gld/engine';
 import type { Level, Move, PlayerView } from '@gld/engine';
 import { ABILITIES, CARD_KINDS, cardTheme, LEVEL_THEME, RESOURCES, TERMS } from '../theme';
 import { ILLEGAL_MESSAGES, tokensText } from '../text';
@@ -27,7 +20,6 @@ interface Props {
 
 /** Détail d'une carte ou d'un paquet, avec les actions légales (recruter, réserver). */
 export function CardSheet({ target, view, canAct, legal, onBuy, onReserve, onClose }: Props) {
-  const me = view.pub.players[view.seat];
   const canReserve = legal.some((m) =>
     target.kind === 'card'
       ? m.type === 'reserve' && m.cardId === target.cardId
@@ -80,8 +72,6 @@ export function CardSheet({ target, view, canAct, legal, onBuy, onReserve, onClo
   const inPyramid = findInPyramid(view.pub, card.id) !== null;
   const isMine = view.reserved.includes(card.id);
   const buyReason = validateMove(view, { type: 'buy', cardId: card.id });
-  const payment = computePayment(card, me);
-  const remaining = effectiveCost(card, me);
   const theme = cardTheme(card);
 
   return (
@@ -121,15 +111,6 @@ export function CardSheet({ target, view, canAct, legal, onBuy, onReserve, onClo
             <dt>Coût</dt>
             <dd>
               {tokensText(Object.fromEntries(TAKEABLE_COLORS.map((c) => [c, card.cost[c] ?? 0])))}
-              {inPyramid || isMine ? (
-                <>
-                  <br />
-                  <small>
-                    Après tes bonus : {tokensText(remaining)}
-                    {payment && <> — tu paierais : {tokensText(payment)}</>}
-                  </small>
-                </>
-              ) : null}
             </dd>
           </dl>
           {canAct && (inPyramid || isMine) && (

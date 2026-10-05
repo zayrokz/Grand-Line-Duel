@@ -1,6 +1,7 @@
 import type { Ref } from 'react';
 import type { TokenColor } from '@gld/engine';
 import { RESOURCES } from '../theme';
+import { Chip } from './Token';
 
 interface Props {
   board: (TokenColor | null)[];
@@ -35,13 +36,9 @@ export function Board({ board, selectable, selected, onCell, hidden, ref }: Prop
             onClick={() => onCell(cell)}
           >
             {token && !hidden?.has(cell) && (
-              <img
-                key={`${cell}-${token}`}
-                className="cell-token"
-                src={RESOURCES[token].icon}
-                alt=""
-                draggable={false}
-              />
+              <span key={`${cell}-${token}`} className="cell-token">
+                <Chip color={token} />
+              </span>
             )}
           </button>
         );

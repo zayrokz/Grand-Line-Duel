@@ -12,22 +12,12 @@ interface Props {
   opponentName: string;
   legal: Move[];
   me: PlayerState;
-  opponent: PlayerState;
   busy: boolean;
   send: (move: Move) => void;
 }
 
 /** Décision en attente : joker, ravitaillement, abordage, carte Empereur, défausse. */
-export function PendingPanel({
-  pending,
-  mine,
-  opponentName,
-  legal,
-  me,
-  opponent,
-  busy,
-  send,
-}: Props) {
+export function PendingPanel({ pending, mine, opponentName, legal, me, busy, send }: Props) {
   return (
     <div className="pending" role="region" aria-live="polite">
       <p className="pending-prompt">{pendingPrompt(pending, mine, opponentName)}</p>
@@ -50,8 +40,7 @@ export function PendingPanel({
             m.type === 'steal'
               ? [
                   <button key={m.color} className="choice" disabled={busy} onClick={() => send(m)}>
-                    <TokenIcon color={m.color} decorative /> {RESOURCES[m.color].name} (
-                    {opponent.tokens[m.color]})
+                    <TokenIcon color={m.color} decorative /> {RESOURCES[m.color].name}
                   </button>,
                 ]
               : [],
@@ -112,9 +101,7 @@ function DiscardPicker({
             >
               −
             </button>
-            <span className="step-value">
-              {chosen[color] ?? 0}/{me.tokens[color]}
-            </span>
+            <span className="step-value">{chosen[color] ?? 0}</span>
             <button
               className="step"
               aria-label={`Rendre un ${RESOURCES[color].name} de plus`}

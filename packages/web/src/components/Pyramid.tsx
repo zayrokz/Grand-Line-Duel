@@ -6,11 +6,10 @@ interface Props {
   pub: PublicState;
   onCard: (cardId: string) => void;
   onDeck: (level: Level) => void;
-  highlight?: ReadonlySet<string>;
 }
 
 /** Pyramide : paquets à gauche, 3 / 4 / 5 cartes visibles par niveau. */
-export function Pyramid({ pub, onCard, onDeck, highlight }: Props) {
+export function Pyramid({ pub, onCard, onDeck }: Props) {
   return (
     <section className="pyramid" aria-label="Pyramide de cartes">
       {[...LEVELS].reverse().map((level) => (
@@ -18,6 +17,7 @@ export function Pyramid({ pub, onCard, onDeck, highlight }: Props) {
           {pub.deckCounts[level] > 0 ? (
             <CardBack
               level={level}
+              stack={pub.deckCounts[level]}
               label={String(pub.deckCounts[level])}
               onClick={() => onDeck(level)}
             />
@@ -26,12 +26,7 @@ export function Pyramid({ pub, onCard, onDeck, highlight }: Props) {
           )}
           {pub.pyramid[level].map((cardId, index) =>
             cardId ? (
-              <CardView
-                key={cardId}
-                cardId={cardId}
-                onClick={() => onCard(cardId)}
-                highlight={highlight?.has(cardId)}
-              />
+              <CardView key={cardId} cardId={cardId} onClick={() => onCard(cardId)} />
             ) : (
               <EmptySlot key={`empty-${index}`} />
             ),

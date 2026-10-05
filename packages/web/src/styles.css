@@ -381,27 +381,70 @@ main {
   vertical-align: middle;
   flex: none;
 }
-.token-count {
+/* ---------- Jetons en relief ---------- */
+.chip {
+  --size: 40px;
+  --edge: color-mix(in srgb, var(--chip, #888) 60%, #000);
+  --t: calc(var(--size) * 0.03);
+  position: relative;
+  display: inline-block;
+  flex: none;
+  width: var(--size);
+  height: var(--size);
+  border-radius: 50%;
+  background: var(--chip, #888);
+  /* Tranche du jeton (épaisseur) puis ombre portée. */
+  box-shadow:
+    0 calc(var(--t) * 1) 0 var(--edge),
+    0 calc(var(--t) * 2) 0 var(--edge),
+    0 calc(var(--t) * 3) 0 var(--edge),
+    0 calc(var(--t) * 4) 0 color-mix(in srgb, var(--edge) 75%, #000),
+    0 calc(var(--t) * 4 + 3px) calc(var(--size) * 0.18) rgba(0, 0, 0, 0.5);
+  transform: translateY(calc(var(--t) * -2));
+}
+.chip > img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  pointer-events: none;
+}
+/* Reflet et biseau. */
+.chip::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  pointer-events: none;
+  background:
+    radial-gradient(
+      ellipse 55% 38% at 34% 20%,
+      rgba(255, 255, 255, 0.6),
+      rgba(255, 255, 255, 0) 70%
+    ),
+    radial-gradient(circle at 50% 50%, rgba(0, 0, 0, 0) 62%, rgba(0, 0, 0, 0.25) 100%);
+  box-shadow:
+    inset 0 calc(var(--size) * 0.03) calc(var(--size) * 0.04) rgba(255, 255, 255, 0.5),
+    inset 0 calc(var(--size) * -0.04) calc(var(--size) * 0.06) rgba(0, 0, 0, 0.35);
+}
+.chip-logpose {
+  --chip: #dcc28c;
+}
+.chip-logpose > img {
+  inset: 10%;
+  width: 80%;
+  height: 80%;
+  border-radius: 0;
+}
+/* Pile : le jeton du dessus entier, la tranche des autres en dessous. */
+.chip-stack {
   display: inline-flex;
+  flex-direction: column-reverse;
   align-items: center;
-  gap: 2px;
-  font-weight: 700;
-  font-variant-numeric: tabular-nums;
 }
-.token-count[data-zero='true'] {
-  opacity: 0.35;
-}
-.token-total {
-  margin-left: auto;
-  font-weight: 700;
-  font-size: 0.85rem;
-  padding: 0 0.4rem;
-  border-radius: 999px;
-  background: rgba(0, 0, 0, 0.1);
-}
-.token-total[data-full='true'] {
-  background: var(--danger);
-  color: #fff;
+.chip-stack .chip + .chip {
+  margin-bottom: calc(var(--size) * -0.84);
 }
 
 /* ---------- Cartes ---------- */
@@ -425,10 +468,33 @@ main {
   align-items: stretch;
   justify-content: flex-start;
   gap: 0;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.35);
+  /* Épaisseur du carton puis ombre portée. */
+  box-shadow:
+    0 1px 0 #e8dec6,
+    0 2px 0 #d5c8aa,
+    0 3px 0 #bfae88,
+    0 5px 10px rgba(0, 0, 0, 0.45);
   flex: none;
   font-size: calc(var(--card-w) * 0.11);
   text-align: left;
+  transition:
+    transform 0.18s ease,
+    box-shadow 0.18s ease;
+}
+/* Reflet sur le pelliculage de la carte. */
+.card::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  background: linear-gradient(
+    125deg,
+    rgba(255, 255, 255, 0.32) 0%,
+    rgba(255, 255, 255, 0) 32%,
+    rgba(255, 255, 255, 0) 68%,
+    rgba(255, 255, 255, 0.12) 100%
+  );
 }
 .card-sm {
   --card-w: 46px;
@@ -437,8 +503,13 @@ main {
   --card-w: 170px;
 }
 button.card:hover:not(:disabled) {
-  filter: brightness(1.06);
-  transform: translateY(-2px);
+  filter: brightness(1.05);
+  transform: perspective(600px) translateY(-6px) rotateX(10deg);
+  box-shadow:
+    0 1px 0 #e8dec6,
+    0 2px 0 #d5c8aa,
+    0 3px 0 #bfae88,
+    0 14px 18px rgba(0, 0, 0, 0.5);
 }
 .card-top {
   display: flex;
@@ -549,18 +620,18 @@ button.card:hover:not(:disabled) {
   width: 19cqw;
   height: 19cqw;
   border-radius: 50%;
-  background: var(--res);
+  background:
+    radial-gradient(circle at 34% 28%, rgba(255, 255, 255, 0.6), rgba(255, 255, 255, 0) 48%),
+    var(--res);
+  box-shadow:
+    inset 0 -1.5cqw 1.5cqw rgba(0, 0, 0, 0.35),
+    0 1cqw 1.5cqw rgba(0, 0, 0, 0.45);
   color: var(--ink);
   font-weight: 800;
   font-size: 12cqw;
   display: grid;
   place-items: center;
   border: 1px solid rgba(0, 0, 0, 0.45);
-}
-.card-highlight {
-  box-shadow:
-    0 0 0 3px var(--accent),
-    0 0 14px var(--accent);
 }
 .card-back {
   background: #1b2f4a;
@@ -679,6 +750,10 @@ button.card:hover:not(:disabled) {
 }
 
 .treasure {
+  box-shadow:
+    0 2px 0 #c9a96a,
+    0 4px 0 #9c7a3c,
+    0 8px 14px rgba(0, 0, 0, 0.45);
   display: flex;
   gap: 0.4rem;
   align-items: center;
@@ -701,13 +776,14 @@ button.card:hover:not(:disabled) {
   width: 36px;
   height: 36px;
 }
-.treasure .progress {
-  color: #8a5a10;
-  font-weight: 700;
-}
 .royals {
   display: flex;
   gap: 0.3rem;
+}
+.supply-logpose {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
 }
 .supply {
   display: flex;
@@ -733,54 +809,94 @@ button.card:hover:not(:disabled) {
   margin-right: 6px;
 }
 .pyramid-row .card:not(.card-back):not(.card-empty) {
-  animation: deal 0.4s ease-out;
+  animation: card-flip 0.6s ease-out;
+}
+/* Paquet : pile de cartes dont l'épaisseur dépend du nombre restant (--d). */
+.deck {
+  --d: 4px;
+  box-shadow:
+    0 calc(var(--d) * 0.25) 0 #efe5cc,
+    0 calc(var(--d) * 0.5) 0 #d9cba8,
+    0 calc(var(--d) * 0.75) 0 #efe5cc,
+    0 var(--d) 0 #c9b88f,
+    0 calc(var(--d) + 4px) 12px rgba(0, 0, 0, 0.55);
+  transform: translateY(calc(var(--d) * -1));
 }
 
 .board {
   --cell: clamp(46px, 16vw, 66px);
   display: grid;
   grid-template-columns: repeat(5, var(--cell));
-  gap: 5px;
-  padding: 10px;
+  gap: 6px;
+  padding: 12px;
   background:
-    repeating-linear-gradient(90deg, rgba(0, 0, 0, 0.08) 0 2px, transparent 2px 22px),
-    linear-gradient(var(--wood), #5a3a1c);
+    repeating-linear-gradient(90deg, rgba(0, 0, 0, 0.07) 0 2px, transparent 2px 23px),
+    radial-gradient(ellipse at 50% 0%, rgba(255, 220, 160, 0.18), transparent 60%),
+    linear-gradient(#7a4e27, #5a3a1c);
   border: 3px solid var(--wood-dark);
-  border-radius: var(--radius);
-  box-shadow: var(--shadow);
+  border-radius: 16px;
+  /* Bord du plateau (épaisseur) et ombre sur la table. */
+  box-shadow:
+    inset 0 2px 0 rgba(255, 220, 170, 0.25),
+    0 4px 0 #3d2410,
+    0 7px 0 #2c1a0b,
+    0 16px 24px rgba(0, 0, 0, 0.55);
+  transform: perspective(1100px) rotateX(12deg);
+  transform-origin: 50% 100%;
 }
 .cell {
   width: var(--cell);
   height: var(--cell);
-  padding: 3px;
+  padding: 0;
   min-width: 0;
   min-height: 0;
-  border-radius: 10px;
-  background: rgba(255, 238, 200, 0.18);
-  border: 2px solid rgba(0, 0, 0, 0.25);
+  border: none;
+  border-radius: 50%;
+  /* Alvéole creusée dans le bois. */
+  background: radial-gradient(circle at 50% 38%, rgba(0, 0, 0, 0.35), rgba(0, 0, 0, 0.12) 72%);
+  box-shadow:
+    inset 0 4px 7px rgba(0, 0, 0, 0.55),
+    inset 0 -1px 0 rgba(255, 225, 180, 0.18),
+    0 1px 0 rgba(255, 225, 180, 0.15);
+  display: grid;
+  place-items: center;
+  transition: transform 0.12s ease;
 }
 .cell:disabled {
   opacity: 1;
   cursor: default;
 }
 .cell-token {
+  display: grid;
+  place-items: center;
   width: 100%;
   height: 100%;
   animation: pop 0.35s ease-out;
   pointer-events: none;
 }
-.cell[data-selectable='true'] {
-  border-color: rgba(255, 255, 255, 0.75);
-  box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.25);
+.cell .chip {
+  --size: calc(var(--cell) * 0.86);
 }
-.cell[data-selectable='true']:hover {
-  background: rgba(255, 255, 255, 0.3);
+.cell[data-selectable='true'] {
+  box-shadow:
+    inset 0 4px 7px rgba(0, 0, 0, 0.55),
+    0 0 0 2px rgba(255, 255, 255, 0.55);
+}
+.cell[data-selectable='true']:hover .chip {
+  transform: translateY(calc(var(--t) * -5));
 }
 .cell[data-selected='true'] {
-  border-color: var(--accent);
-  background: rgba(224, 180, 58, 0.45);
-  box-shadow: 0 0 12px var(--accent);
-  transform: scale(1.06);
+  box-shadow:
+    inset 0 4px 7px rgba(0, 0, 0, 0.55),
+    0 0 0 3px var(--accent),
+    0 0 16px var(--accent);
+}
+/* Jeton choisi : soulevé du plateau. */
+.cell[data-selected='true'] .chip {
+  transform: translateY(calc(var(--t) * -8)) scale(1.06);
+}
+.cell .chip {
+  transition: transform 0.15s ease;
 }
 
 .player {
@@ -825,16 +941,13 @@ button.card:hover:not(:disabled) {
   background: var(--accent);
   font-weight: 700;
 }
-.player-scores {
-  margin-left: auto;
-  display: flex;
-  gap: 0.6rem;
-  font-weight: 800;
-  white-space: nowrap;
-}
 .privilege-button {
-  min-height: 36px;
-  padding: 0.1rem 0.5rem;
+  margin-left: auto;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  min-height: 44px;
+  padding: 0.15rem 0.6rem;
   border-radius: 999px;
   background: var(--sea);
   color: #fff;
@@ -843,43 +956,41 @@ button.card:hover:not(:disabled) {
   animation: glow 2s ease-in-out infinite;
 }
 .privilege-button-label {
-  font-size: 0.75rem;
+  font-size: 0.8rem;
 }
-.player-tokens {
+.logpose-row {
+  --size: 26px;
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+}
+.player-header > .logpose-row {
+  margin-left: auto;
+}
+.player-table {
   display: flex;
   flex-wrap: wrap;
-  gap: 0.35rem;
-  align-items: center;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 0.6rem;
 }
-.player-bonuses {
+.player-tokens {
+  --size: 30px;
   display: flex;
-  gap: 0.3rem;
-}
-.bonus-chip {
-  flex: 1;
-  display: flex;
-  align-items: baseline;
-  justify-content: center;
-  gap: 0.2rem;
-  background: var(--res);
-  color: var(--ink);
-  border-radius: 6px;
-  padding: 0.1rem 0.2rem;
-  font-size: 0.85rem;
-  border: 1px solid rgba(0, 0, 0, 0.3);
-}
-.bonus-chip small {
-  font-size: 0.7rem;
-  opacity: 0.9;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: 7px;
+  min-height: 42px;
+  padding-top: 4px;
 }
 .player-extras {
   display: flex;
-  gap: 0.75rem;
+  gap: 0.6rem;
   flex-wrap: wrap;
+  align-items: flex-end;
 }
 .player-reserved,
-.player-royals,
-.player-cards-list {
+.player-royals {
   display: flex;
   gap: 0.3rem;
   flex-wrap: wrap;
@@ -887,10 +998,23 @@ button.card:hover:not(:disabled) {
 .player-reserved .card {
   --card-w: 52px;
 }
-.player-cards summary {
-  cursor: pointer;
-  min-height: 32px;
-  font-size: 0.85rem;
+/* Cartes recrutées : colonnes par couleur, seule la partie haute reste visible. */
+.tableau {
+  display: flex;
+  gap: 6px;
+  align-items: flex-start;
+  overflow-x: auto;
+  padding: 4px 2px 8px;
+}
+.tableau-col {
+  display: flex;
+  flex-direction: column;
+}
+.tableau-col .card {
+  --card-w: 48px;
+}
+.tableau-col .card + .card {
+  margin-top: calc(var(--card-w) * -1.06);
 }
 .log {
   margin: 0;
@@ -1270,10 +1394,18 @@ button.card:hover:not(:disabled) {
     opacity: 0;
   }
 }
-@keyframes deal {
-  from {
-    transform: translateY(-14px) rotate(-4deg);
-    opacity: 0;
+
+@keyframes card-flip {
+  0% {
+    transform: perspective(700px) rotateY(-100deg) translateY(-8px);
+    opacity: 0.3;
+  }
+  60% {
+    transform: perspective(700px) rotateY(12deg);
+    opacity: 1;
+  }
+  100% {
+    transform: perspective(700px) rotateY(0);
   }
 }
 @keyframes rise {
@@ -1342,6 +1474,12 @@ button.card:hover:not(:disabled) {
   }
   .board {
     --cell: 62px;
+  }
+  .player-tokens {
+    --size: 34px;
+  }
+  .tableau-col .card {
+    --card-w: 56px;
   }
   .bag {
     width: 104px;

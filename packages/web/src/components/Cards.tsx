@@ -23,7 +23,6 @@ interface CardProps {
   onClick?: () => void;
   /** Couleur effective d'une carte joker déjà associée. */
   assigned?: GemColor | null;
-  highlight?: boolean;
 }
 
 function cardLabel(cardId: string): string {
@@ -39,7 +38,7 @@ function cardLabel(cardId: string): string {
 }
 
 /** Carte Équipage / Navire / Équipement. */
-export function CardView({ cardId, size = 'md', onClick, assigned, highlight }: CardProps) {
+export function CardView({ cardId, size = 'md', onClick, assigned }: CardProps) {
   const card = getCard(cardId);
   const image = cardImage(cardId);
   const effectiveBonus = card.bonus === 'joker' && assigned ? assigned : card.bonus;
@@ -96,7 +95,7 @@ export function CardView({ cardId, size = 'md', onClick, assigned, highlight }: 
       </ul>
     </>
   );
-  const className = `card card-${size} lvl-${card.level} ${highlight ? 'card-highlight' : ''}`;
+  const className = `card card-${size} lvl-${card.level}`;
   return onClick ? (
     <button
       type="button"
@@ -120,13 +119,20 @@ export function CardBack({
   label,
   size = 'md',
   onClick,
+  stack,
 }: {
   level: Level;
   label?: string;
   size?: Size;
   onClick?: () => void;
+  /** Nombre de cartes du paquet : l'épaisseur de la pile en dépend. */
+  stack?: number;
 }) {
-  const style = { '--level': LEVEL_THEME[level].color } as CSSProperties;
+  const style = {
+    '--level': LEVEL_THEME[level].color,
+    ...(stack !== undefined ? { '--d': `${Math.min(10, 1 + stack * 0.4)}px` } : {}),
+  } as CSSProperties;
+  const deck = stack !== undefined ? 'deck' : '';
   const content = (
     <>
       <img src={ICONS.cardBack} alt="" />
@@ -138,7 +144,7 @@ export function CardBack({
   return onClick ? (
     <button
       type="button"
-      className={`card card-back card-${size}`}
+      className={`card card-back card-${size} ${deck}`}
       style={style}
       onClick={onClick}
       aria-label={aria}
@@ -146,7 +152,12 @@ export function CardBack({
       {content}
     </button>
   ) : (
-    <div className={`card card-back card-${size}`} style={style} role="img" aria-label={aria}>
+    <div
+      className={`card card-back card-${size} ${deck}`}
+      style={style}
+      role="img"
+      aria-label={aria}
+    >
       {content}
     </div>
   );
