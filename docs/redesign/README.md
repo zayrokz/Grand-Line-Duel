@@ -12,7 +12,7 @@ Rien ici n'est encore branché dans l'application : ce dossier sert de source po
 | `components.css`        | Recette « 3D sans ombre » : `.btn` (primaire, secondaire, danger, fantôme, désactivé, pressé), `.token` (jeton SVG complet + états), `.pip` (pastille sous 26 px), `.card` (cadre bois, bandeau, médaillon), `.panel`, animations et version `prefers-reduced-motion`. |
 | `tokens/`               | Les 7 jetons complets (cerclage bois à lattes et rivets, face colorée, picto en relief, épaisseur ; cerclage doré pour le Berry). À utiliser à partir de 26 px.                                                                                                        |
 | `icons/resources/`      | Pictogrammes des 7 ressources pour les pastilles (coûts, journal) : sac en toile, carte roulée, trois bûches, bouteille, bombe noire, fruit tacheté, pièce à ancre.                                                                                                    |
-| `icons/game/`           | Log Pose, Prime, Renommée, sac, Trésor, bonus polyvalent, roue (logo).                                                                                                                                                                                                 |
+| `icons/game/`           | Log Pose, Prime, Renommée, sac de pioche (`icon-bag.png`, sac avec une pioche, fond transparent), Trésor, bonus polyvalent, roue (logo).                                                                                                                               |
 | `icons/abilities/`      | Rejouer, Abordage, Ravitaillement, Polyvalent (la capacité Log Pose réutilise `icon-logpose.svg`).                                                                                                                                                                     |
 | `icons/ui/`             | Icônes d'interface (menu, journal, règles, copier, partager, valider, fermer, retour, attente, modifier, retirer, voir, profil, revanche, port) et statistiques (parties, défaites, abandons).                                                                         |
 | `illustrations/cards/`  | Illustrations des cartes : vignettes peintes sur parchemin, 180 × 216, WebP (`art-<sujet>.webp`).                                                                                                                                                                      |
@@ -78,14 +78,14 @@ L'app cherche `src/assets/cards/<id>.webp` (voir `theme.ts`). Copier la vignette
 | `L1-29` Mascotte du navire       | `art-singe.webp`          |
 | `L1-30` Bourse de doublons       | `art-emeraudes.webp`      |
 | `L2-21` Timonier aguerri         | `art-gouvernail.webp`     |
-| `L2-22` Pavillon noir            | `art-drapeau-noir.webp`   |
+| `L2-22` Pavillon noir            | `art-drapeau-rouge.webp`  |
 | `L2-23` Carte au trésor déchirée | `art-carte-tresor.webp`   |
 | `L2-24` Coffre au trésor         | `art-coffre.webp`         |
 | `L3-11` Vaisseau fantôme         | `art-navire-fantome.webp` |
 | `L3-12` Vent providentiel        | `art-ile.webp`            |
 | `L3-13` Trident des tempêtes     | `art-trident.webp`        |
 
-Toutes les cartes ont leur vignette. La famille Pavillon et la carte « Pavillon noir » partagent le drapeau noir ; un drapeau d'une autre couleur permettrait de les distinguer.
+Toutes les cartes ont leur vignette. `drapeaux/` garde six variantes de drapeau (noir pommeau argent, blanc à damier, bleu, rayé rouge et noir, blanc liseré rouge, noir bordé d'or) qui ne sont attribuées à aucune carte pour l'instant.
 
 ### Cartes Empereur
 
