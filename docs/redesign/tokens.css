@@ -36,6 +36,12 @@
   --color-board-hole: #5c3318;
   --color-board-hole-shade: #43230f;
 
+  /* Cartes */
+  --color-card-wood: #a86d38;
+  --color-card-wood-light: #d49a5e;
+  --color-card-wood-edge: #5e3818;
+  --color-card-parchment: #ebcb91;
+
   /* Accents et états */
   --color-primary: #f7c548;
   --color-primary-edge: #c48f1c;
