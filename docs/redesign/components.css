@@ -190,6 +190,15 @@
   background: var(--band);
   box-shadow: inset 0 3px 0 rgb(255 255 255 / 0.28);
 }
+.card__art {
+  /* vignette parchemin 180 × 216 (WebP), plein cadre sous le bandeau */
+  position: absolute;
+  inset: 38px 0 0;
+  display: block;
+  width: 100%;
+  height: calc(100% - 38px);
+  object-fit: cover;
+}
 .card__medal {
   position: absolute;
   top: 9px;
