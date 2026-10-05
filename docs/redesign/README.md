@@ -15,11 +15,12 @@ Rien ici n'est encore branché dans l'application : ce dossier sert de source po
 | `icons/game/`           | Log Pose, Prime, Renommée, sac, Trésor, bonus polyvalent, roue (logo).                                                                                                                                                                                                 |
 | `icons/abilities/`      | Rejouer, Abordage, Ravitaillement, Polyvalent (la capacité Log Pose réutilise `icon-logpose.svg`).                                                                                                                                                                     |
 | `icons/ui/`             | Icônes d'interface (menu, journal, règles, copier, partager, valider, fermer, retour, attente, modifier, retirer, voir, profil, revanche, port) et statistiques (parties, défaites, abandons).                                                                         |
-| `illustrations/cards/`  | Illustrations de cartes 80 × 64.                                                                                                                                                                                                                                       |
+| `illustrations/cards/`  | Illustrations des cartes : vignettes peintes sur parchemin, 180 × 216, WebP (`art-<sujet>.webp`).                                                                                                                                                                      |
+| `illustrations/scenes/` | Illustrations vectorielles hors cartes : accueil (galion, chaloupe, navigateur), salon (chaloupe), victoire (coffre), avatars provisoires (galion, sabre).                                                                                                             |
 | `illustrations/royals/` | Emblèmes des 4 cartes Empereur.                                                                                                                                                                                                                                        |
 | `avatars/`              | Emblèmes de joueur 64 × 64.                                                                                                                                                                                                                                            |
 
-Tous les SVG sont originaux : contour `#2A1A14`, aplats, aucun dégradé, aucun filtre.
+Tous les SVG sont originaux : contour `#2A1A14`, aplats, aucun dégradé, aucun filtre. Les vignettes de cartes viennent de la planche d'illustrations fournie par le porteur du projet.
 
 ## Intégration
 
@@ -49,22 +50,42 @@ Tous les SVG sont originaux : contour `#2A1A14`, aplats, aucun dégradé, aucun 
 | `take_privilege` | `icon-logpose.svg`                                              |
 | `associate`      | `icon-polyvalent.svg` (le bonus joker utilise `icon-joker.svg`) |
 
-### Illustrations par famille (`FAMILIES` de `theme.ts`)
+### Illustrations des cartes
 
-| Famille                      | Illustration                                                                                                                                                                                          |
-| ---------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `sword` (Sabre)              | `illo-sabre.svg`                                                                                                                                                                                      |
-| `gem` (Ravitailleur)         | `illo-ravitailleur.svg`                                                                                                                                                                               |
-| `necklace` (Chaloupe rapide) | `illo-chaloupe.svg`                                                                                                                                                                                   |
-| `double` (Navire marchand)   | `illo-marchand.svg`                                                                                                                                                                                   |
-| `signet` (Navigateur)        | `illo-navigateur.svg`                                                                                                                                                                                 |
-| `glove` (Abordeur)           | `illo-abordeur.svg`                                                                                                                                                                                   |
-| `lady` (Galion)              | `illo-galion.svg`                                                                                                                                                                                     |
-| `joker` (Matelot polyvalent) | `illo-matelot.svg`                                                                                                                                                                                    |
-| `points` (Trésor)            | `illo-coffre.svg` / `illo-bourse.svg` / `illo-trident.svg`                                                                                                                                            |
-| Cartes nommées               | `L1-27` Perroquet → `illo-perroquet.svg`, `L3-11` Vaisseau fantôme → `illo-fantome.svg`, `L3-13` Trident → `illo-trident.svg`, `L2-24` Coffre → `illo-coffre.svg`, `L1-30` Bourse → `illo-bourse.svg` |
+L'app cherche `src/assets/cards/<id>.webp` (voir `theme.ts`). Copier la vignette de la famille sous l'identifiant de chaque carte, ou faire pointer `FAMILIES` / `CARD_NAMES` vers ces fichiers.
 
-Il manque encore des illustrations pour Mousse, Pavillon, Officier, Capitaine et quelques cartes nommées (Bouteille à la mer, Mascotte, Timonier, Pavillon noir, Carte déchirée, Vent providentiel). Elles sont à dessiner dans le même style.
+| Famille (`FAMILIES`)         | Vignette              |
+| ---------------------------- | --------------------- |
+| `earring` (Mousse)           | `art-corde.webp`      |
+| `sword` (Sabre)              | `art-sabre.webp`      |
+| `gem` (Ravitailleur)         | `art-tonneau.webp`    |
+| `necklace` (Chaloupe rapide) | `art-voile.webp`      |
+| `double` (Navire marchand)   | `art-caisse.webp`     |
+| `signet` (Navigateur)        | `art-sextant.webp`    |
+| `glove` (Abordeur)           | `art-pistolet.webp`   |
+| `tiara` (Officier)           | `art-boussole.webp`   |
+| `crown` (Capitaine)          | `art-longue-vue.webp` |
+| `lady` (Galion)              | `art-navire.webp`     |
+| `joker` (Matelot polyvalent) | `art-mariniere.webp`  |
+| `points` (Trésor)            | `art-coffre.webp`     |
+| `diadem` (Pavillon)          | `art-canon.webp` \*   |
+
+| Carte nommée (`CARD_NAMES`)      | Vignette                |
+| -------------------------------- | ----------------------- |
+| `L1-26` Matelot polyvalent       | `art-mariniere.webp`    |
+| `L1-28` Bouteille à la mer       | `art-rhum.webp`         |
+| `L1-30` Bourse de doublons       | `art-emeraudes.webp`    |
+| `L2-21` Timonier aguerri         | `art-gouvernail.webp`   |
+| `L2-23` Carte au trésor déchirée | `art-carte-tresor.webp` |
+| `L2-24` Coffre au trésor         | `art-coffre.webp`       |
+| `L3-12` Vent providentiel        | `art-ile.webp`          |
+| `L1-27` Perroquet bavard         | `art-parchemin.webp` \* |
+| `L1-29` Mascotte du navire       | `art-poisson.webp` \*   |
+| `L2-22` Pavillon noir            | `art-boulets.webp` \*   |
+| `L3-11` Vaisseau fantôme         | `art-navire.webp` \*    |
+| `L3-13` Trident des tempêtes     | `art-ancre.webp` \*     |
+
+\* Vignette provisoire : il manque un drapeau, un drapeau noir, un perroquet, un singe, un navire spectral et un trident, dans le même format (parchemin, 180 × 216).
 
 ### Cartes Empereur
 
@@ -72,11 +93,11 @@ Il manque encore des illustrations pour Mousse, Pavillon, Officier, Capitaine et
 
 ### Avatars (`AVATARS` de `theme.ts`)
 
-`parrot` → `avatar-perroquet`, `octopus` → `avatar-pieuvre`, `shark` → `avatar-requin`, `anchor` → `avatar-ancre`, `compass` → `avatar-boussole`, `skull` → `avatar-crane`, `crab` → `avatar-crabe`, `whale` → `avatar-baleine`, `turtle` → `avatar-tortue`. En attendant des avatars dédiés, `ship`, `map` et `sword` réutilisent `illo-galion`, `glyph-carte` et `illo-sabre`.
+`parrot` → `avatar-perroquet`, `octopus` → `avatar-pieuvre`, `shark` → `avatar-requin`, `anchor` → `avatar-ancre`, `compass` → `avatar-boussole`, `skull` → `avatar-crane`, `crab` → `avatar-crabe`, `whale` → `avatar-baleine`, `turtle` → `avatar-tortue`. En attendant des avatars dédiés, `ship`, `map` et `sword` réutilisent `scenes/illo-galion`, `glyph-carte` et `scenes/illo-sabre`.
 
 ## Cartes
 
-Format repris du visuel de référence : cadre en bois, bandeau à la couleur du bonus, fanion des points de Renommée en haut à gauche, médaillon du bonus en haut à droite (avec le picto de la ressource), capacité sous le médaillon, grande illustration sur parchemin, coûts empilés en bas à gauche (chiffre sur la tranche de la ressource + picto). Le nom n'est plus imprimé : il s'affiche au survol, dans la fiche détaillée sur mobile et dans l'`aria-label`.
+Format repris du visuel de référence : cadre en bois, bandeau à la couleur du bonus, fanion des points de Renommée en haut à gauche, médaillon du bonus en haut à droite (avec le picto de la ressource), capacité sous le médaillon, vignette parchemin en plein cadre sous le bandeau (`.card__art`, `object-fit: cover`), coûts empilés en bas à gauche (chiffre sur la tranche de la ressource + picto). Le nom n'est plus imprimé : il s'affiche au survol, dans la fiche détaillée sur mobile et dans l'`aria-label`.
 
 ## Règles du style
 
