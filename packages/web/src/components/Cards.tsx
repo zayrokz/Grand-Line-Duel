@@ -3,17 +3,15 @@ import { getCard, getRoyal, TAKEABLE_COLORS } from '@gld/engine';
 import type { GemColor, Level } from '@gld/engine';
 import {
   ABILITIES,
-  bonusColor,
+  bonusTheme,
   cardImage,
   cardTheme,
   ICONS,
-  JOKER_THEME,
   LEVEL_THEME,
   RESOURCES,
   royalTheme,
   TERMS,
 } from '../theme';
-import { TokenIcon } from './Token';
 
 type Size = 'sm' | 'md' | 'lg';
 
@@ -37,65 +35,93 @@ function cardLabel(cardId: string): string {
   return `${cardTheme(card).name}, niveau ${card.level}, ${card.points} ${TERMS.points}, ${card.crowns} ${TERMS.crowns}, ${bonus}${abilities ? `, ${abilities}` : ''}`;
 }
 
-/** Carte Équipage / Navire / Équipement. */
+/** Fanion des points de Renommée (en haut à gauche). */
+function Ribbon({ value }: { value: number }) {
+  return (
+    <span className="card-ribbon">
+      <svg viewBox="0 0 24 42" aria-hidden="true">
+        <path d="M1.5 0V39L12 33.5L22.5 39V0" />
+        <path className="card-ribbon-gloss" d="M5.5 2V31" />
+      </svg>
+      <span className="card-ribbon-value">{value}</span>
+    </span>
+  );
+}
+
+/**
+ * Carte Équipage / Navire / Équipement : cadre en bois, bandeau à la couleur du bonus, fanion des
+ * points, médaillon du bonus, capacités, vignette en plein cadre et coûts empilés en bas à gauche.
+ * Le nom n'est pas imprimé : il s'affiche au survol, dans la fiche et dans le libellé accessible.
+ */
 export function CardView({ cardId, size = 'md', onClick, assigned }: CardProps) {
   const card = getCard(cardId);
-  const image = cardImage(cardId);
-  const effectiveBonus = card.bonus === 'joker' && assigned ? assigned : card.bonus;
-  const style = { '--bonus': bonusColor(effectiveBonus) } as CSSProperties;
   const theme = cardTheme(card);
+  const image = cardImage(cardId) ?? theme.art;
+  const effectiveBonus = card.bonus === 'joker' && assigned ? assigned : card.bonus;
+  const look = bonusTheme(effectiveBonus);
+  const style = {
+    '--band': look.band,
+    '--ribbon': look.ribbon,
+    '--ribbon-ink': look.ribbonInk,
+  } as CSSProperties;
   const content = (
     <>
-      <div className="card-top">
-        <span className="card-points">{card.points > 0 ? card.points : ''}</span>
-        {card.crowns > 0 && (
-          <span className="card-crowns" title={`${card.crowns} ${TERMS.crowns}`}>
-            <img src={ICONS.crown} alt="" />
-            {card.crowns}
-          </span>
-        )}
-        <span className="card-bonus">
-          {effectiveBonus === null ? null : effectiveBonus === 'joker' ? (
-            <span
-              className="joker-dot"
-              style={{ background: JOKER_THEME.color }}
-              title="Bonus polyvalent"
-            />
-          ) : (
-            Array.from({ length: card.bonusCount }, (_, i) => (
-              <TokenIcon key={i} color={effectiveBonus} size={18} />
-            ))
-          )}
+      <span className="card-inner">
+        <span className="card-band" />
+        <img className="card-art" src={image} alt="" draggable={false} />
+      </span>
+      {card.points > 0 && <Ribbon value={card.points} />}
+      {card.crowns > 0 && (
+        <span className="card-crowns" data-after-ribbon={card.points > 0}>
+          <img src={ICONS.crown} alt="" />
+          {card.crowns}
         </span>
-      </div>
-      <div className="card-art">
-        {image ? <img src={image} alt="" /> : <span className="card-emoji">{theme.art}</span>}
-        {card.abilities.length > 0 && (
-          <span className="card-abilities">
-            {card.abilities.map((a) => (
-              <span key={a} className="card-ability" title={ABILITIES[a].label}>
-                {ABILITIES[a].icon}
-              </span>
-            ))}
-          </span>
+      )}
+      <span className="card-medals">
+        {effectiveBonus === 'joker' ? (
+          <img className="card-joker" src={ICONS.joker} alt="" />
+        ) : effectiveBonus === null ? null : (
+          Array.from({ length: card.bonusCount }, (_, i) => (
+            <span key={i} className="card-medal">
+              <img src={RESOURCES[effectiveBonus].glyph} alt="" />
+            </span>
+          ))
         )}
-      </div>
-      {size !== 'sm' && <div className="card-name">{theme.name}</div>}
-      <ul className="card-cost" aria-label="Coût">
-        {TAKEABLE_COLORS.filter((c) => (card.cost[c] ?? 0) > 0).map((color) => (
-          <li
-            key={color}
-            style={
-              { '--res': RESOURCES[color].color, '--ink': RESOURCES[color].ink } as CSSProperties
-            }
-          >
-            {card.cost[color]}
-          </li>
-        ))}
+      </span>
+      {card.abilities.length > 0 && (
+        <span className="card-abilities">
+          {card.abilities.map((a) => (
+            <span key={a} className="card-ability" title={ABILITIES[a].label}>
+              <img src={ABILITIES[a].icon} alt="" />
+            </span>
+          ))}
+        </span>
+      )}
+      <ul className="card-cost" aria-hidden="true">
+        {TAKEABLE_COLORS.filter((c) => (card.cost[c] ?? 0) > 0).map((color) => {
+          const res = RESOURCES[color];
+          return (
+            <li
+              key={color}
+              style={
+                {
+                  '--num-bg': res.light ? res.color : res.edge,
+                  '--num-ink': res.light ? 'var(--color-ink)' : 'var(--color-on-dark)',
+                  '--face': res.color,
+                } as CSSProperties
+              }
+            >
+              <span className="cost-num">{card.cost[color]}</span>
+              <span className="cost-pip">
+                <img src={res.glyph} alt="" />
+              </span>
+            </li>
+          );
+        })}
       </ul>
     </>
   );
-  const className = `card card-${size} lvl-${card.level}`;
+  const className = `card card-${size}`;
   return onClick ? (
     <button
       type="button"
@@ -103,17 +129,30 @@ export function CardView({ cardId, size = 'md', onClick, assigned }: CardProps) 
       style={style}
       onClick={onClick}
       aria-label={cardLabel(cardId)}
+      data-name={theme.name}
     >
       {content}
     </button>
   ) : (
-    <div className={className} style={style} role="img" aria-label={cardLabel(cardId)}>
+    <div
+      className={className}
+      style={style}
+      role="img"
+      aria-label={cardLabel(cardId)}
+      data-name={theme.name}
+    >
       {content}
     </div>
   );
 }
 
-/** Dos de carte (paquets, réserves adverses). */
+/** Nombre de couches visibles sous un paquet, selon le nombre de cartes restantes. */
+function stackLayers(stack: number): number {
+  if (stack > 8) return 2;
+  return stack > 1 ? 1 : 0;
+}
+
+/** Dos de carte (paquets, réserves adverses) : rayures à la couleur du niveau. */
 export function CardBack({
   level,
   label,
@@ -130,34 +169,42 @@ export function CardBack({
 }) {
   const style = {
     '--level': LEVEL_THEME[level].color,
-    ...(stack !== undefined ? { '--d': `${Math.min(10, 1 + stack * 0.4)}px` } : {}),
+    '--level-edge': LEVEL_THEME[level].edge,
   } as CSSProperties;
-  const deck = stack !== undefined ? 'deck' : '';
+  const layers = stack !== undefined ? stackLayers(stack) : 0;
   const content = (
-    <>
-      <img src={ICONS.cardBack} alt="" />
-      <span className="card-back-level">{'•'.repeat(level)}</span>
-      {label && <span className="card-back-label">{label}</span>}
-    </>
+    <span className="card-inner card-back-face">
+      <span className="card-back-level">
+        {size === 'sm' ? LEVEL_THEME[level].roman : `Niv. ${LEVEL_THEME[level].roman}`}
+      </span>
+      {size !== 'sm' && (
+        <span className="card-back-medal">
+          <img src={ICONS.logo} alt="" />
+        </span>
+      )}
+      {label && (
+        <span className="card-back-count">
+          <b>{label}</b>
+          {size !== 'sm' && <small>cartes</small>}
+        </span>
+      )}
+    </span>
   );
-  const aria = `Paquet de niveau ${level}${label ? ` (${label})` : ''}`;
+  const aria = `Paquet de niveau ${level}${label ? ` (${label} cartes)` : ''}`;
+  const className = `card card-back card-${size}`;
   return onClick ? (
     <button
       type="button"
-      className={`card card-back card-${size} ${deck}`}
+      className={className}
       style={style}
+      data-layers={layers}
       onClick={onClick}
       aria-label={aria}
     >
       {content}
     </button>
   ) : (
-    <div
-      className={`card card-back card-${size} ${deck}`}
-      style={style}
-      role="img"
-      aria-label={aria}
-    >
+    <div className={className} style={style} data-layers={layers} role="img" aria-label={aria}>
       {content}
     </div>
   );
@@ -167,7 +214,7 @@ export function EmptySlot({ size = 'md' }: { size?: Size }) {
   return <div className={`card card-${size} card-empty`} aria-hidden="true" />;
 }
 
-/** Carte Empereur. */
+/** Carte Empereur : bandeau pourpre, Renommée, capacité et emblème. */
 export function RoyalView({
   royalId,
   size = 'md',
@@ -178,25 +225,24 @@ export function RoyalView({
   onClick?: () => void;
 }) {
   const royal = getRoyal(royalId);
-  const image = cardImage(royalId);
+  const image = cardImage(royalId) ?? royalTheme(royal).art;
   const theme = royalTheme(royal);
   const abilities = royal.abilities.map((a) => ABILITIES[a]);
   const label = `${theme.name} : ${royal.points} ${TERMS.points}${abilities.map((a) => `, ${a.label}`).join('')}`;
   const content = (
-    <>
-      <div className="card-top">
-        <span className="card-points">{royal.points}</span>
+    <span className="card-inner royal-face">
+      <span className="royal-band">
+        <span className="royal-points">{royal.points}</span>
         {abilities.map((a) => (
-          <span key={a.label} className="card-ability-inline">
-            {a.icon}
+          <span key={a.label} className="royal-ability" title={a.label}>
+            <img src={a.icon} alt="" />
           </span>
         ))}
-      </div>
-      <div className="card-art">
-        {image ? <img src={image} alt="" /> : <span className="card-emoji">{theme.art}</span>}
-      </div>
-      {size !== 'sm' && <div className="card-name">{theme.name}</div>}
-    </>
+      </span>
+      <span className="royal-art">
+        <img src={image} alt="" draggable={false} />
+      </span>
+    </span>
   );
   return onClick ? (
     <button
@@ -204,6 +250,7 @@ export function RoyalView({
       className={`card royal card-${size}`}
       onClick={onClick}
       aria-label={label}
+      data-name={theme.name}
     >
       {content}
     </button>

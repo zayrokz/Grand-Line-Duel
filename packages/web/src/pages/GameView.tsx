@@ -3,6 +3,7 @@ import type { ReactNode } from 'react';
 import { getLegalMoves } from '@gld/engine';
 import type { GameDoc, Move, PlayerView, Seat } from '@gld/engine';
 import { api, errorMessage } from '../api';
+import { Avatar } from '../components/Avatar';
 import { Bag } from '../components/Bag';
 import { Board } from '../components/Board';
 import { RoyalView } from '../components/Cards';
@@ -14,12 +15,12 @@ import { PendingPanel } from '../components/PendingPanel';
 import { PlayerPanel } from '../components/PlayerPanel';
 import { Pyramid } from '../components/Pyramid';
 import { useToast } from '../components/Toast';
-import { LogPoseToken } from '../components/Token';
+import { Chip, LogPoseToken } from '../components/Token';
 import { Treasure } from '../components/Treasure';
 import { useBagAnimation } from '../hooks/useBagAnimation';
 import { useMoveSender } from '../hooks/useMoveSender';
 import { useNow } from '../hooks/useNow';
-import { ICONS, RESOURCES, TERMS } from '../theme';
+import { ICONS, RESOURCES, TERMS, UI_ICONS } from '../theme';
 import { EndOverlay } from './EndOverlay';
 
 type Mode =
@@ -224,9 +225,12 @@ export function GameView({ gameId, game, reserved, uid }: Props) {
   } else if (!myTurn) {
     actionBar = (
       <div className="action-row">
-        <p className="hint">
-          Tour de <strong>{oppName}</strong>
-          {timer && ` · ${timer}`}
+        <p className="hint hint-wait">
+          <img src={UI_ICONS.wait} alt="" className="hint-icon" />
+          <span>
+            Tour de <strong>{oppName}</strong>
+            {timer && ` · ${timer}`}. Tu joueras à la fin de son tour.
+          </span>
         </p>
         {canClaim && (
           <button className="danger" onClick={claim}>
@@ -239,6 +243,12 @@ export function GameView({ gameId, game, reserved, uid }: Props) {
     const complete = takeLines.some((line) => sameCells(line, mode.cells));
     actionBar = (
       <div className="action-row">
+        <span className="chosen" aria-hidden="true">
+          {mode.cells.map((cell) => {
+            const token = pub.board[cell];
+            return token ? <Chip key={cell} color={token} /> : null;
+          })}
+        </span>
         <button
           className="primary"
           disabled={!complete || busy}
@@ -310,118 +320,134 @@ export function GameView({ gameId, game, reserved, uid }: Props) {
   }
 
   const ended = game.status === 'finished' || game.status === 'abandoned';
+  const turnSeat: Seat = ended ? seat : myTurn ? seat : oppSeat;
 
   return (
     <div className="game">
-      <header className="game-bar">
-        <span className={`turn-indicator ${myTurn ? 'mine' : ''}`}>
-          {ended ? 'Partie terminée' : myTurn ? 'À toi de jouer' : `Tour de ${oppName}`}
-          {timer && !ended && <span className="timer"> {timer}</span>}
-        </span>
-        <span className="game-bar-actions">
-          <button className="ghost small mobile-only" onClick={() => setShowLog(true)}>
-            Journal
-          </button>
-          {playing && (
-            <button className="ghost small" onClick={() => setConfirmLeave(true)}>
-              Abandonner
-            </button>
-          )}
-          {ended && hideEnd && (
-            <button className="ghost small" onClick={() => setHideEnd(false)}>
-              Résultat
-            </button>
-          )}
-        </span>
-      </header>
-
       <div className="game-grid">
-        <div className="area-opp">
-          <PlayerPanel
-            info={game.players[oppSeat]}
-            player={opp}
-            active={playing && pub.current === oppSeat}
-            isMe={false}
-            timer={!myTurn ? timer : null}
-          />
-        </div>
-
-        <div className="area-market">
-          <Treasure />
-          <div className="royals" aria-label={`${TERMS.royals} disponibles`}>
-            {pub.royals.map((id) => (
-              <RoyalView key={id} royalId={id} size="sm" />
-            ))}
-          </div>
-          <div className="supply">
-            <span
-              className="supply-logpose"
-              title={`${TERMS.privileges} en réserve (pas encore attribués aux joueurs)`}
-            >
-              Réserve :{' '}
-              <span
-                className="logpose-row"
-                role="img"
-                aria-label={`${pub.privileges} ${TERMS.privileges}`}
-              >
-                {Array.from({ length: pub.privileges }, (_, i) => (
-                  <LogPoseToken key={i} />
+        <div className="col-left">
+          <div className="area-market">
+            <Treasure />
+            <section className="panel-box royals-panel" aria-label={`${TERMS.royals} disponibles`}>
+              <h3 className="ribbon-title">Cartes Empereur</h3>
+              <div className="royals">
+                {pub.royals.map((id) => (
+                  <RoyalView key={id} royalId={id} size="sm" />
                 ))}
-              </span>
-            </span>
+              </div>
+            </section>
+          </div>
+
+          <div className="area-board">
+            <section className="panel-box board-panel" aria-label="Plateau et sac">
+              <div className="board-tools">
+                <div
+                  className="supply"
+                  title={`${TERMS.privileges} en réserve (pas encore attribués aux joueurs)`}
+                >
+                  <span className="supply-label">Réserve de {TERMS.privileges}</span>
+                  <span
+                    className="logpose-row"
+                    role="img"
+                    aria-label={`${pub.privileges} ${TERMS.privileges} en réserve`}
+                  >
+                    {Array.from({ length: pub.privileges }, (_, i) => (
+                      <LogPoseToken key={i} />
+                    ))}
+                  </span>
+                </div>
+                <Bag
+                  ref={bagAnimation.bagRef}
+                  count={pub.bagCount}
+                  open={bagAnimation.bagOpen}
+                  shaking={bagAnimation.shaking}
+                  bounceKey={bagAnimation.bounceKey}
+                  canRefill={mainPhase && canReplenish && !busy}
+                  onClick={onBag}
+                />
+              </div>
+              <Board
+                ref={bagAnimation.boardRef}
+                board={pub.board}
+                selectable={selectable}
+                selected={selected}
+                onCell={onCell}
+                hidden={bagAnimation.hiddenCells}
+              />
+            </section>
           </div>
         </div>
 
-        <div className="area-pyramid">
-          <Pyramid
-            pub={pub}
-            onCard={(cardId) => setSheet({ kind: 'card', cardId })}
-            onDeck={(level) => setSheet({ kind: 'deck', level })}
-          />
+        <div className="col-center">
+          <header className="game-bar">
+            <span
+              className={`turn-indicator ${myTurn ? 'mine' : ''} ${ended ? 'ended' : ''}`}
+              aria-live="polite"
+            >
+              {!ended && <Avatar id={game.players[turnSeat]?.avatar ?? ''} size="sm" />}
+              <span className="turn-label">
+                {ended ? 'Partie terminée' : myTurn ? 'À toi de jouer' : `Tour de ${oppName}`}
+              </span>
+              {timer && !ended && <span className="timer">{timer}</span>}
+            </span>
+            <span className="game-bar-actions">
+              <button className="secondary small mobile-only" onClick={() => setShowLog(true)}>
+                <img src={UI_ICONS.log} alt="" className="inline-icon" /> Journal
+              </button>
+              {playing && (
+                <button className="danger small" onClick={() => setConfirmLeave(true)}>
+                  Abandonner
+                </button>
+              )}
+              {ended && hideEnd && (
+                <button className="secondary small" onClick={() => setHideEnd(false)}>
+                  Résultat
+                </button>
+              )}
+            </span>
+          </header>
+
+          <div className="area-pyramid">
+            <Pyramid
+              pub={pub}
+              onCard={(cardId) => setSheet({ kind: 'card', cardId })}
+              onDeck={(level) => setSheet({ kind: 'deck', level })}
+            />
+          </div>
+
+          <div className={`action-bar ${myTurn ? 'my-turn' : ''}`} aria-busy={busy}>
+            <div className="action-content">{actionBar}</div>
+          </div>
         </div>
 
-        <div className="area-board">
-          <Board
-            ref={bagAnimation.boardRef}
-            board={pub.board}
-            selectable={selectable}
-            selected={selected}
-            onCell={onCell}
-            hidden={bagAnimation.hiddenCells}
-          />
-        </div>
+        <div className="col-right">
+          <div className="area-opp">
+            <PlayerPanel
+              info={game.players[oppSeat]}
+              player={opp}
+              active={playing && pub.current === oppSeat}
+              isMe={false}
+              timer={!myTurn ? timer : null}
+            />
+          </div>
 
-        <div className="area-me">
-          <PlayerPanel
-            info={game.players[seat]}
-            player={me}
-            active={myTurn}
-            isMe
-            reserved={reserved}
-            onReserved={(cardId) => setSheet({ kind: 'card', cardId })}
-            onPrivileges={canUsePrivileges ? () => startPrivileges() : undefined}
-            timer={myTurn ? timer : null}
-          />
-        </div>
+          <div className="area-me">
+            <PlayerPanel
+              info={game.players[seat]}
+              player={me}
+              active={myTurn}
+              isMe
+              reserved={reserved}
+              onReserved={(cardId) => setSheet({ kind: 'card', cardId })}
+              onPrivileges={canUsePrivileges ? () => startPrivileges() : undefined}
+              timer={myTurn ? timer : null}
+            />
+          </div>
 
-        <aside className="area-log desktop-only">
-          <h3>Journal</h3>
-          <GameLog log={pub.log} names={names} />
-        </aside>
-      </div>
-
-      <div className={`action-bar ${myTurn ? 'my-turn' : ''}`} aria-busy={busy}>
-        <div className="action-bar-inner">
-          <Bag
-            ref={bagAnimation.bagRef}
-            count={pub.bagCount}
-            open={bagAnimation.bagOpen}
-            shaking={bagAnimation.shaking}
-            bounceKey={bagAnimation.bounceKey}
-            canRefill={mainPhase && canReplenish && !busy}
-            onClick={onBag}
-          />
-          <div className="action-content">{actionBar}</div>
+          <aside className="area-log panel-box desktop-only">
+            <h3 className="ribbon-title">Journal</h3>
+            <GameLog log={pub.log} names={names} />
+          </aside>
         </div>
       </div>
 

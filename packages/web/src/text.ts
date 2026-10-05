@@ -114,7 +114,7 @@ export function logText(entry: LogEntry, names: [string, string]): string | null
     case 'pass':
       return `${p} passe son tour (aucune action possible).`;
     case 'end':
-      return `🏆 ${names[entry.winner]} remporte la partie (${WIN_REASONS[entry.reason]}) !`;
+      return `${names[entry.winner]} remporte la partie (${WIN_REASONS[entry.reason]}) !`;
   }
 }
 

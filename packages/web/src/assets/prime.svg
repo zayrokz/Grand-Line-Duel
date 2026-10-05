@@ -1,9 +1,0 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="Prime">
-  <path d="M14 8h36v48H14z" fill="#f1e2b8" stroke="#6b5131" stroke-width="2.5" stroke-linejoin="round"/>
-  <path d="M14 8l4 4h28l4-4M14 56l4-4h28l4 4" fill="#e2cd94" stroke="#6b5131" stroke-width="1.5"/>
-  <circle cx="32" cy="27" r="8" fill="#3a2a18"/>
-  <rect x="27" y="32" width="10" height="5" rx="1.5" fill="#3a2a18"/>
-  <circle cx="29" cy="26.5" r="2.2" fill="#f1e2b8"/><circle cx="35" cy="26.5" r="2.2" fill="#f1e2b8"/>
-  <path d="M31 33v3M33 33v3" stroke="#f1e2b8" stroke-width="1"/>
-  <path d="M21 43h22M23 48h18" stroke="#6b5131" stroke-width="2.4" stroke-linecap="round"/>
-</svg>

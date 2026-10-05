@@ -2,7 +2,38 @@ import type { CSSProperties } from 'react';
 import type { TokenColor } from '@gld/engine';
 import { ICONS, RESOURCES } from '../theme';
 
-/** Petite icône plate (texte, boutons, règles). */
+/** Sous cette taille, le jeton complet devient illisible : on affiche une pastille. */
+const PIP_BELOW = 26;
+
+/**
+ * Pastille : le pictogramme de la ressource sur un disque de sa couleur (coûts, journal, texte).
+ * Chaque couleur est toujours accompagnée de son pictogramme.
+ */
+export function Pip({
+  color,
+  size = 20,
+  decorative = false,
+}: {
+  color: TokenColor;
+  size?: number;
+  decorative?: boolean;
+}) {
+  const theme = RESOURCES[color];
+  return (
+    <span
+      className="pip"
+      style={{ '--face': theme.color, '--size': `${size}px` } as CSSProperties}
+      role={decorative ? undefined : 'img'}
+      aria-label={decorative ? undefined : theme.name}
+      aria-hidden={decorative ? true : undefined}
+      title={theme.name}
+    >
+      <img src={theme.glyph} alt="" draggable={false} />
+    </span>
+  );
+}
+
+/** Icône de ressource dans le texte et les boutons : jeton complet, ou pastille si petite. */
 export function TokenIcon({
   color,
   size = 28,
@@ -13,11 +44,12 @@ export function TokenIcon({
   /** Icône accompagnée de son nom en texte : masquée des lecteurs d'écran. */
   decorative?: boolean;
 }) {
+  if (size < PIP_BELOW) return <Pip color={color} size={size} decorative={decorative} />;
   const theme = RESOURCES[color];
   return (
     <img
       className="token-icon"
-      src={theme.icon}
+      src={theme.token}
       alt={decorative ? '' : theme.name}
       title={theme.name}
       width={size}
@@ -28,19 +60,18 @@ export function TokenIcon({
 }
 
 /**
- * Jeton en relief (disque épais, reflet, ombre). La taille vient de la variable CSS `--size`
- * du conteneur ; la couleur de la tranche est dérivée de la couleur de la ressource.
+ * Jeton (cerclage bois, face colorée, picto, épaisseur : tout est dans le dessin). La taille vient
+ * de la variable CSS `--size` du conteneur.
  */
 export function Chip({ color, label }: { color: TokenColor; label?: string }) {
   return (
     <span
       className="chip"
-      style={{ '--chip': RESOURCES[color].color } as CSSProperties}
       role={label ? 'img' : undefined}
       aria-label={label}
       aria-hidden={label ? undefined : true}
     >
-      <img src={RESOURCES[color].icon} alt="" draggable={false} />
+      <img src={RESOURCES[color].token} alt="" draggable={false} />
     </span>
   );
 }
@@ -62,10 +93,10 @@ export function ChipStack({ color, count }: { color: TokenColor; count: number }
   );
 }
 
-/** Jeton Log Pose en relief. */
+/** Jeton Log Pose. */
 export function LogPoseToken() {
   return (
-    <span className="chip chip-logpose" aria-hidden="true">
+    <span className="logpose-chip" aria-hidden="true">
       <img src={ICONS.privilege} alt="" draggable={false} />
     </span>
   );

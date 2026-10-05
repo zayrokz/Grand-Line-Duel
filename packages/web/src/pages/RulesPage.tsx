@@ -16,7 +16,7 @@ import {
   WIN_POINTS,
 } from '@gld/engine';
 import { TokenIcon } from '../components/Token';
-import { ABILITIES, RESOURCES, TERMS } from '../theme';
+import { ABILITIES, RESOURCES, TERMS, UI_ICONS } from '../theme';
 
 const ordinal = (n: number) => (n === 1 ? '1re' : `${n}e`);
 
@@ -69,8 +69,8 @@ export function RulesPage() {
           rapporte 1 ressource au choix sur le plateau (jamais de {RESOURCES.gold.name}).
         </li>
         <li>
-          <strong>Remplir le plateau</strong> (si le sac n’est pas vide) : touche le sac, en bas à
-          gauche ; tous ses jetons sont replacés en spirale depuis le centre. Ton adversaire reçoit
+          <strong>Remplir le plateau</strong> (si le sac n’est pas vide) : touche le sac, à côté du
+          plateau ; tous ses jetons sont replacés en spirale depuis le centre. Ton adversaire reçoit
           1 {TERMS.privilege}.
         </li>
       </ol>
@@ -97,7 +97,8 @@ export function RulesPage() {
       <ul>
         {CARD_ABILITIES.map((key) => (
           <li key={key}>
-            {ABILITIES[key].icon} <strong>{ABILITIES[key].label}</strong> : {ABILITIES[key].help}
+            <img src={ABILITIES[key].icon} alt="" className="inline-icon" />{' '}
+            <strong>{ABILITIES[key].label}</strong> : {ABILITIES[key].help}
           </li>
         ))}
       </ul>
@@ -144,7 +145,9 @@ export function RulesPage() {
         &amp; Bruno Cathala, Space Cowboys). Univers, noms et illustrations originaux.
       </p>
       <p>
-        <Link to="/">← Retour au port</Link>
+        <Link className="button secondary" to="/">
+          <img src={UI_ICONS.port} alt="" className="inline-icon" /> Retour au port
+        </Link>
       </p>
     </article>
   );

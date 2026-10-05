@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import type { FormEvent } from 'react';
+import type { CSSProperties, FormEvent } from 'react';
 import { AVATAR_IDS, NICKNAME_MAX, normalizeNickname } from '@gld/engine';
 import { api, errorMessage } from '../api';
 import { AVATARS } from '../theme';
@@ -65,6 +65,7 @@ export function ProfileForm({
             className="avatar-option"
             data-checked={avatar === id}
             title={AVATARS[id].label}
+            style={{ '--avatar-bg': AVATARS[id].bg } as CSSProperties}
           >
             <input
               type="radio"
@@ -74,7 +75,7 @@ export function ProfileForm({
               onChange={() => setAvatar(id)}
               aria-label={AVATARS[id].label}
             />
-            <span aria-hidden="true">{AVATARS[id].emoji}</span>
+            <img src={AVATARS[id].image} alt="" draggable={false} />
           </label>
         ))}
       </fieldset>

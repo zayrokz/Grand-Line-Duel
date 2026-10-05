@@ -18,8 +18,8 @@ export default defineConfig({
         scope: '/',
         display: 'standalone',
         orientation: 'any',
-        background_color: '#0e1b2c',
-        theme_color: '#0e1b2c',
+        background_color: '#b87a45',
+        theme_color: '#4a2a17',
         categories: ['games'],
         icons: [
           { src: '/icons/icon-192.png', sizes: '192x192', type: 'image/png' },

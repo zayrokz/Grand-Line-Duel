@@ -1,11 +1,12 @@
 import { useEffect, useState } from 'react';
+import type { CSSProperties } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { summarize } from '@gld/engine';
 import type { GameDoc, Seat } from '@gld/engine';
 import { api, errorMessage } from '../api';
 import { Avatar } from '../components/Avatar';
 import { useToast } from '../components/Toast';
-import { ICONS, TERMS, WIN_REASONS } from '../theme';
+import { ICONS, SCENES, TERMS, UI_ICONS, WIN_REASONS } from '../theme';
 
 interface Props {
   gameId: string;
@@ -52,26 +53,50 @@ export function EndOverlay({ gameId, game, seat, uid, onHide }: Props) {
         ? `Le trésor légendaire est à toi : ${WIN_REASONS[reason]}.`
         : `${game.players[winner]?.nickname ?? 'Ton adversaire'} s’empare du trésor : ${WIN_REASONS[reason]}.`;
 
+  const won = winner !== null && winner === seat;
   return (
     <div className="end-backdrop">
+      {won && (
+        <div className="confetti" aria-hidden="true">
+          {CONFETTI.map((c, i) => (
+            <span
+              key={i}
+              style={
+                {
+                  left: `${c.x}%`,
+                  '--c': c.color,
+                  '--r': `${c.rot}deg`,
+                  '--delay': `${c.delay}ms`,
+                  borderRadius: c.round ? '50%' : '3px',
+                } as CSSProperties
+              }
+            />
+          ))}
+        </div>
+      )}
       <div
-        className={`end-card ${winner === seat ? 'end-win' : 'end-loss'}`}
+        className={`end-card ${won ? 'end-win' : winner === null ? 'end-none' : 'end-loss'}`}
         role="dialog"
         aria-label={title}
       >
-        <img src={ICONS.treasure} alt="" className="end-treasure" />
-        <h2>{title}</h2>
-        <p>{subtitle}</p>
+        <h2 className="end-title">{title}</h2>
+        <div className="end-illustration">
+          <span className="end-rays" />
+          <img src={won ? SCENES.chest : SCENES.storm} alt="" />
+        </div>
+        <p className="end-subtitle">{subtitle}</p>
         {game.state && (
           <div className="end-scores">
             {game.players.map((player, i) => {
               const s = summarize(game.state!.players[i as Seat]);
               return (
                 <div key={player.uid} className={`end-score ${winner === i ? 'winner' : ''}`}>
+                  {winner === i && <span className="end-winner-tag">Vainqueur</span>}
                   <Avatar id={player.avatar} />
                   <strong>{player.nickname}</strong>
-                  <span>
-                    ⭐ {s.points} {TERMS.points} · {s.crowns} {TERMS.crowns}
+                  <span className="end-score-values">
+                    <img src={ICONS.points} alt={TERMS.points} /> {s.points}
+                    <img src={ICONS.crown} alt={TERMS.crowns} /> {s.crowns}
                   </span>
                 </div>
               );
@@ -81,6 +106,7 @@ export function EndOverlay({ gameId, game, seat, uid, onHide }: Props) {
         {game.startedAt && oppUid && (
           <div className="end-actions">
             <button className="primary" disabled={busy || iAsked} onClick={rematch}>
+              <img src={UI_ICONS.rematch} alt="" className="inline-icon" />
               {iAsked
                 ? 'Revanche demandée…'
                 : theyAsked
@@ -96,14 +122,23 @@ export function EndOverlay({ gameId, game, seat, uid, onHide }: Props) {
           </div>
         )}
         <div className="action-row">
-          <button className="ghost" onClick={onHide}>
-            Voir le plateau
+          <button className="secondary" onClick={onHide}>
+            <img src={UI_ICONS.eye} alt="" className="inline-icon" /> Voir le plateau
           </button>
-          <Link className="button ghost" to="/">
-            Retour au port
+          <Link className="button secondary" to="/">
+            <img src={UI_ICONS.port} alt="" className="inline-icon" /> Retour au port
           </Link>
         </div>
       </div>
     </div>
   );
 }
+
+/** Confettis plats (pas de flou), tombés une seule fois. */
+const CONFETTI = Array.from({ length: 18 }, (_, i) => ({
+  x: (i * 37 + 7) % 100,
+  color: ['#f7c548', '#ee6a4e', '#2e9c8a', '#3c82c8', '#9563d0', '#3f9b4f'][i % 6]!,
+  rot: (i * 47) % 180,
+  delay: (i % 6) * 70,
+  round: i % 3 === 0,
+}));

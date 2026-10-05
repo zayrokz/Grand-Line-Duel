@@ -2,7 +2,7 @@
 
 Livrables de la direction artistique retenue (direction A). Les maquettes complètes (accueil, salon, jeu et ses états, fin de partie, profil, en PC 1440 et mobile 390) et la planche du design system sont dans le canevas de design associé.
 
-Rien ici n'est encore branché dans l'application : ce dossier sert de source pour l'intégration.
+La direction est intégrée dans l'application (`packages/web`) : variables dans `src/theme.css`, styles dans `src/styles.css`, images dans `src/assets/` et habillage (noms, couleurs, vignettes par carte) dans `src/theme.ts`. Ce dossier reste la source de référence des fichiers d'origine.
 
 ## Fichiers
 

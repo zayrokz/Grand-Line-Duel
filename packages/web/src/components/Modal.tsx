@@ -1,5 +1,6 @@
 import { useEffect, useRef } from 'react';
 import type { ReactNode } from 'react';
+import { UI_ICONS } from '../theme';
 
 interface Props {
   title: string;
@@ -8,7 +9,7 @@ interface Props {
   wide?: boolean;
 }
 
-/** Fenêtre modale accessible (Échap, clic sur le fond, focus initial). */
+/** Fenêtre modale accessible (Échap, clic sur le fond, focus initial). Feuille du bas sur mobile. */
 export function Modal({ title, onClose, children, wide }: Props) {
   const ref = useRef<HTMLDivElement>(null);
   useEffect(() => {
@@ -32,7 +33,7 @@ export function Modal({ title, onClose, children, wide }: Props) {
         <header className="modal-header">
           <h2>{title}</h2>
           <button className="icon-button" onClick={onClose} aria-label="Fermer">
-            ✕
+            <img src={UI_ICONS.close} alt="" />
           </button>
         </header>
         <div className="modal-body">{children}</div>

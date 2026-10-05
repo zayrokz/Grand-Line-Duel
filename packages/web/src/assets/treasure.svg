@@ -1,8 +1,0 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="Le Trésor">
-  <path d="M10 30c0-9 6-15 22-15s22 6 22 15z" fill="#9a5b28" stroke="#3d2410" stroke-width="2.5" stroke-linejoin="round"/>
-  <rect x="10" y="30" width="44" height="22" rx="2" fill="#b06a30" stroke="#3d2410" stroke-width="2.5"/>
-  <path d="M10 37h44M21 16v36M43 16v36" stroke="#e0b43a" stroke-width="3"/>
-  <rect x="28" y="33" width="8" height="9" rx="1.5" fill="#e0b43a" stroke="#3d2410" stroke-width="2"/>
-  <circle cx="32" cy="37" r="1.4" fill="#3d2410"/>
-  <g fill="#f2c94c" stroke="#7a5a10" stroke-width="1"><circle cx="18" cy="14" r="3"/><circle cx="46" cy="12" r="2.5"/><circle cx="52" cy="20" r="2"/></g>
-</svg>

@@ -15,8 +15,16 @@ interface Props {
 
 /** Plateau 5×5 de jetons. Seules les cases jouables sont activables. */
 export function Board({ board, selectable, selected, onCell, hidden, ref }: Props) {
+  // Quand le joueur choisit des jetons, ceux qu'il ne peut pas prendre s'estompent.
+  const interactive = selectable.size > 0 || selected.size > 0;
   return (
-    <div ref={ref} className="board" role="grid" aria-label="Plateau de ressources">
+    <div
+      ref={ref}
+      className="board"
+      role="grid"
+      aria-label="Plateau de ressources"
+      data-interactive={interactive}
+    >
       {board.map((token, cell) => {
         const canSelect = selectable.has(cell);
         const isSelected = selected.has(cell);

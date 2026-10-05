@@ -1,9 +1,10 @@
 import { findInPyramid, getCard, TAKEABLE_COLORS, validateMove } from '@gld/engine';
 import type { Level, Move, PlayerView } from '@gld/engine';
 import { ABILITIES, CARD_KINDS, cardTheme, LEVEL_THEME, RESOURCES, TERMS } from '../theme';
-import { ILLEGAL_MESSAGES, tokensText } from '../text';
+import { ILLEGAL_MESSAGES, tokenLabel } from '../text';
 import { CardBack, CardView } from './Cards';
 import { Modal } from './Modal';
+import { TokenIcon } from './Token';
 
 export type SheetTarget = { kind: 'card'; cardId: string } | { kind: 'deck'; level: Level };
 
@@ -102,15 +103,20 @@ export function CardSheet({ target, view, canAct, legal, onBuy, onReserve, onClo
                 <dd>
                   {card.abilities.map((a) => (
                     <span key={a} className="ability-line">
-                      {ABILITIES[a].icon} {ABILITIES[a].label} — {ABILITIES[a].help}
+                      <img src={ABILITIES[a].icon} alt="" className="inline-icon" />{' '}
+                      <strong>{ABILITIES[a].label}</strong> — {ABILITIES[a].help}
                     </span>
                   ))}
                 </dd>
               </>
             )}
             <dt>Coût</dt>
-            <dd>
-              {tokensText(Object.fromEntries(TAKEABLE_COLORS.map((c) => [c, card.cost[c] ?? 0])))}
+            <dd className="cost-line">
+              {TAKEABLE_COLORS.filter((c) => (card.cost[c] ?? 0) > 0).map((c) => (
+                <span key={c} className="cost-item">
+                  <TokenIcon color={c} size={22} decorative /> {tokenLabel(c, card.cost[c] ?? 0)}
+                </span>
+              ))}
             </dd>
           </dl>
           {canAct && (inPyramid || isMine) && (

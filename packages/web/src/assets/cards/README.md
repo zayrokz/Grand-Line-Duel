@@ -1,8 +1,10 @@
-# Illustrations des cartes
+# Illustrations propres à une carte
 
-Déposez ici une image par carte, nommée d'après son identifiant dans
-`packages/engine/data/cards.json` : `L1-01.webp`, `L2-13.png`, `L3-05.svg`…
-Formats acceptés : `.webp`, `.png`, `.jpg`, `.jpeg`, `.svg` (ratio conseillé 5:7).
+Par défaut, chaque carte affiche la vignette de sa famille (`src/assets/art/`, voir `FAMILIES` et
+`CARD_NAMES` dans `src/theme.ts`).
 
-Sans image, la carte affiche son placeholder (`art`, un emoji) sur fond de la couleur de son bonus.
+Pour donner une illustration particulière à une carte, déposez ici une image nommée d'après son
+identifiant dans `packages/engine/data/cards.json` : `L1-01.webp`, `L2-13.png`, `L3-05.svg`…
+Formats acceptés : `.webp`, `.png`, `.jpg`, `.jpeg`, `.svg`. Format conseillé : vignette sur
+parchemin de 180 × 216 px, affichée en plein cadre sous le bandeau.
 N'utilisez que des illustrations dont vous détenez les droits.

@@ -7,7 +7,7 @@ import { JoinPage } from './pages/JoinPage';
 import { NotFound } from './pages/NotFound';
 import { ProfilePage } from './pages/ProfilePage';
 import { RulesPage } from './pages/RulesPage';
-import { GAME_TITLE, ICONS } from './theme';
+import { GAME_TITLE, ICONS, UI_ICONS } from './theme';
 
 export function App() {
   const online = useOnline();
@@ -15,12 +15,20 @@ export function App() {
     <div className="app">
       <header className="app-header">
         <Link to="/" className="brand" aria-label={`${GAME_TITLE} — accueil`}>
-          <img src={ICONS.logo} alt="" width={28} height={28} />
-          <span>{GAME_TITLE}</span>
+          <span className="brand-logo">
+            <img src={ICONS.logo} alt="" width={30} height={30} />
+          </span>
+          <span className="brand-title">{GAME_TITLE}</span>
         </Link>
         <nav>
-          <Link to="/regles">Règles</Link>
-          <Link to="/profil">Profil</Link>
+          <Link to="/regles" aria-label="Règles">
+            <img src={UI_ICONS.rules} alt="" />
+            <span className="nav-label">Règles</span>
+          </Link>
+          <Link to="/profil" aria-label="Profil">
+            <img src={UI_ICONS.profile} alt="" />
+            <span className="nav-label">Profil</span>
+          </Link>
         </nav>
       </header>
       {!online && (

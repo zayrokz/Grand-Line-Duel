@@ -4,20 +4,26 @@ import { ICONS, TERMS } from '../theme';
 /** Carte « Le Trésor » : rappel des 3 conditions de victoire (sans calcul pour les joueurs). */
 export function Treasure() {
   return (
-    <section className="treasure" aria-label={`${TERMS.victoryCard} : conditions de victoire`}>
+    <section
+      className="panel-box treasure"
+      aria-label={`${TERMS.victoryCard} : conditions de victoire`}
+    >
+      <h3 className="ribbon-title">{TERMS.victoryCard}</h3>
       <img src={ICONS.treasure} alt="" className="treasure-icon" />
-      <div>
-        <h3>{TERMS.victoryCard}</h3>
-        <ul>
-          <li>
-            ⭐ {WIN_POINTS} {TERMS.points}
-          </li>
-          <li>
-            <img src={ICONS.crown} alt="" className="inline-icon" /> {WIN_CROWNS} {TERMS.crowns}
-          </li>
-          <li>⭐ {WIN_COLOR_POINTS} d’une même couleur</li>
-        </ul>
-      </div>
+      <ul>
+        <li>
+          <img src={ICONS.points} alt="" />
+          <b>{WIN_POINTS}</b> {TERMS.points}
+        </li>
+        <li>
+          <img src={ICONS.crown} alt="" />
+          <b>{WIN_CROWNS}</b> {TERMS.crowns}
+        </li>
+        <li>
+          <img src={ICONS.joker} alt="" />
+          <b>{WIN_COLOR_POINTS}</b> {TERMS.points} d’une même couleur
+        </li>
+      </ul>
     </section>
   );
 }

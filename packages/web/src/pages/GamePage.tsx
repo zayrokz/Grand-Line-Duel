@@ -6,6 +6,7 @@ import { Avatar } from '../components/Avatar';
 import { useToast } from '../components/Toast';
 import { useGame } from '../hooks/useGame';
 import { useSession } from '../session';
+import { SCENES, UI_ICONS } from '../theme';
 import { GameView } from './GameView';
 
 export function GamePage() {
@@ -86,19 +87,23 @@ function Lobby({ gameId, game }: { gameId: string; game: GameDoc }) {
 
   return (
     <div className="panel center lobby">
-      <h2>Salon ouvert</h2>
+      <h2 className="ribbon-title">Salon ouvert</h2>
       {host && (
-        <p>
-          <Avatar id={host.avatar} /> {host.nickname} attend un adversaire…
+        <p className="lobby-host">
+          <Avatar id={host.avatar} /> <span>{host.nickname} attend un adversaire…</span>
         </p>
       )}
       <p className="muted">Code du salon</p>
       <p className="room-code" aria-label={`Code ${game.code?.split('').join(' ')}`}>
-        {game.code}
+        {(game.code ?? '').split('').map((letter, i) => (
+          <span key={i} aria-hidden="true">
+            {letter}
+          </span>
+        ))}
       </p>
       <div className="action-row center">
         <button className="primary" onClick={share}>
-          Partager le lien d’invitation
+          <img src={UI_ICONS.share} alt="" className="inline-icon" /> Partager le lien d’invitation
         </button>
         <button className="ghost" disabled={busy} onClick={cancel}>
           Annuler le salon
@@ -107,8 +112,8 @@ function Lobby({ gameId, game }: { gameId: string; game: GameDoc }) {
       <p className="muted small">
         La partie démarre automatiquement dès que ton adversaire rejoint.
       </p>
-      <div className="waiting-wave" aria-hidden="true">
-        🌊⛵🌊
+      <div className="waiting-sea" aria-hidden="true">
+        <img src={SCENES.rowboat} alt="" className="waiting-boat" />
       </div>
     </div>
   );

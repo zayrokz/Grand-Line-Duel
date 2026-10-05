@@ -1,10 +1,16 @@
-import { AVATARS, avatarEmoji } from '../theme';
+import type { CSSProperties } from 'react';
+import { avatarTheme } from '../theme';
 
 export function Avatar({ id, size = 'md' }: { id: string; size?: 'sm' | 'md' | 'lg' }) {
-  const label = (AVATARS as Record<string, { label: string }>)[id]?.label ?? 'Pirate';
+  const theme = avatarTheme(id);
   return (
-    <span className={`avatar avatar-${size}`} role="img" aria-label={label}>
-      {avatarEmoji(id)}
+    <span
+      className={`avatar avatar-${size}`}
+      style={{ '--avatar-bg': theme.bg } as CSSProperties}
+      role="img"
+      aria-label={theme.label}
+    >
+      <img src={theme.image} alt="" draggable={false} />
     </span>
   );
 }

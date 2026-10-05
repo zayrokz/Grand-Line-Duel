@@ -21,7 +21,7 @@ import { ProfileForm } from '../components/ProfileForm';
 import { useToast } from '../components/Toast';
 import { auth, db } from '../firebase';
 import { useSession } from '../session';
-import { WIN_REASONS } from '../theme';
+import { ICONS, TERMS, UI_ICONS, WIN_REASONS } from '../theme';
 
 const AUTH_ERRORS: Record<string, string> = {
   'auth/email-already-in-use':
@@ -67,18 +67,22 @@ export function ProfilePage() {
           <h2>Statistiques</h2>
           <div className="stats">
             <div>
+              <img src={UI_ICONS.played} alt="" />
               <b>{profile.stats.played}</b>
               <span>parties</span>
             </div>
-            <div>
+            <div className="stat-win">
+              <img src={ICONS.treasure} alt="" />
               <b>{profile.stats.wins}</b>
               <span>victoires</span>
             </div>
             <div>
+              <img src={UI_ICONS.losses} alt="" />
               <b>{profile.stats.losses}</b>
               <span>défaites</span>
             </div>
             <div>
+              <img src={UI_ICONS.abandons} alt="" />
               <b>{profile.stats.abandons}</b>
               <span>abandons</span>
             </div>
@@ -89,7 +93,9 @@ export function ProfilePage() {
       <History uid={user.uid} />
       <Account user={user} />
       <p className="center">
-        <Link to="/">← Retour au port</Link>
+        <Link className="button secondary" to="/">
+          <img src={UI_ICONS.port} alt="" className="inline-icon" /> Retour au port
+        </Link>
       </p>
     </div>
   );
@@ -119,8 +125,9 @@ function History({ uid }: { uid: string }) {
                 contre <Avatar id={h.opponent.avatar} size="sm" /> {h.opponent.nickname}
               </span>
               <span className="muted small">
-                {WIN_REASONS[h.reason]} · ⭐ {h.myPoints} – {h.opponentPoints} ·{' '}
-                {new Date(h.endedAt.toMillis()).toLocaleDateString('fr-FR')}
+                {WIN_REASONS[h.reason]} ·{' '}
+                <img src={ICONS.points} alt={TERMS.points} className="inline-icon" /> {h.myPoints} –{' '}
+                {h.opponentPoints} · {new Date(h.endedAt.toMillis()).toLocaleDateString('fr-FR')}
               </span>
             </li>
           ))}

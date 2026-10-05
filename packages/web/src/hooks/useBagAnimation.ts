@@ -6,7 +6,7 @@ import { RESOURCES } from '../theme';
 const EMPTY: ReadonlySet<number> = new Set();
 const SHAKE_MS = 320;
 const STAGGER_MS = 110;
-const FLIGHT_MS = 650;
+const FLIGHT_MS = 480;
 const CLOSE_DELAY_MS = 350;
 const SCROLL_MS = 550;
 
@@ -88,15 +88,14 @@ export function useBagAnimation(board: (TokenColor | null)[], bagCount: number) 
               y: to.top + to.height / 2 - size / 2,
             };
             const peak = { x: (start.x + end.x) / 2, y: Math.min(start.y, end.y) - 90 };
-            // Même rendu que les jetons du plateau : disque en relief (voir .chip dans styles.css).
+            // Même rendu que les jetons du plateau (voir .chip dans styles.css).
             const img = document.createElement('span');
             img.className = 'flying-token chip';
-            img.style.setProperty('--chip', RESOURCES[color].color);
             img.style.setProperty('--size', `${size}px`);
             img.style.width = `${size}px`;
             img.style.height = `${size}px`;
             const face = document.createElement('img');
-            face.src = RESOURCES[color].icon;
+            face.src = RESOURCES[color].token;
             face.alt = '';
             img.appendChild(face);
             document.body.appendChild(img);
@@ -104,20 +103,20 @@ export function useBagAnimation(board: (TokenColor | null)[], bagCount: number) 
             const animation = img.animate(
               [
                 {
-                  transform: `translate(${start.x}px, ${start.y}px) scale(0.25) rotate(-40deg)`,
+                  transform: `translate(${start.x}px, ${start.y}px) scale(0.25)`,
                   opacity: 0,
                 },
                 {
-                  transform: `translate(${start.x}px, ${start.y - 30}px) scale(0.7) rotate(-20deg)`,
+                  transform: `translate(${start.x}px, ${start.y - 30}px) scale(0.7)`,
                   opacity: 1,
                   offset: 0.15,
                 },
                 {
-                  transform: `translate(${peak.x}px, ${peak.y}px) scale(1.15) rotate(120deg)`,
+                  transform: `translate(${peak.x}px, ${peak.y}px) scale(1.15)`,
                   offset: 0.55,
                 },
                 {
-                  transform: `translate(${end.x}px, ${end.y}px) scale(1) rotate(360deg)`,
+                  transform: `translate(${end.x}px, ${end.y}px) scale(1)`,
                   opacity: 1,
                 },
               ],

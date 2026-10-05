@@ -5,7 +5,7 @@ interface Props {
   count: number;
   open: boolean;
   shaking: boolean;
-  /** Le joueur peut remplir le plateau maintenant : le sac s'illumine. */
+  /** Le joueur peut remplir le plateau maintenant : le bouton passe au jaune « Remplir ». */
   canRefill: boolean;
   bounceKey: number;
   onClick: () => void;
@@ -26,15 +26,12 @@ export function Bag({ count, open, shaking, canRefill, bounceKey, onClick, ref }
       aria-label={label}
       title={label}
     >
-      {/* Enveloppes animées : le bouton lui-même ne bouge jamais (cible de clic stable). */}
-      <span className="bag-glow">
-        <span key={bounceKey} className={`bag-body ${bounceKey > 0 ? 'bag-bounce' : ''}`}>
-          <img className="bag-img bag-img-closed" src={ICONS.bagClosed} alt="" draggable={false} />
-          <img className="bag-img bag-img-open" src={ICONS.bagOpen} alt="" draggable={false} />
-        </span>
+      {/* Enveloppe animée : le bouton lui-même ne bouge pas (cible de clic stable). */}
+      <span key={bounceKey} className={`bag-body ${bounceKey > 0 ? 'bag-bounce' : ''}`}>
+        <img className="bag-img" src={ICONS.bag} alt="" draggable={false} />
       </span>
+      <span className="bag-label">{canRefill ? 'Remplir' : 'Sac'}</span>
       <span className="bag-count">{count}</span>
-      {canRefill && <span className="bag-ribbon">Remplir</span>}
     </button>
   );
 }

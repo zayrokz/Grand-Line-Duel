@@ -8,7 +8,7 @@ import { ProfileForm } from '../components/ProfileForm';
 import { useToast } from '../components/Toast';
 import { useSession } from '../session';
 import { ERROR_MESSAGES } from '../text';
-import { GAME_TAGLINE, ICONS } from '../theme';
+import { GAME_TAGLINE, ICONS, SCENES, UI_ICONS } from '../theme';
 
 export function HomePage() {
   const { user, profile, error } = useSession();
@@ -22,10 +22,12 @@ export function HomePage() {
 
   if (profile === null) {
     return (
-      <div className="panel">
-        <img src={ICONS.logo} alt="" className="hero-logo" />
+      <div className="panel onboarding">
+        <span className="hero-logo">
+          <img src={ICONS.logo} alt="" />
+        </span>
         <h1>Bienvenue à bord !</h1>
-        <p>{GAME_TAGLINE}</p>
+        <p className="tagline">{GAME_TAGLINE}</p>
         <ProfileForm submitLabel="Embarquer" />
       </div>
     );
@@ -64,61 +66,82 @@ export function HomePage() {
   return (
     <div className="home">
       <section className="panel hero">
-        <img src={ICONS.logo} alt="" className="hero-logo" />
+        <span className="hero-logo">
+          <img src={ICONS.logo} alt="" />
+        </span>
         <h1>Grand Line Duel</h1>
-        <p>{GAME_TAGLINE}</p>
+        <p className="tagline">{GAME_TAGLINE}</p>
         <p className="welcome">
           <Avatar id={profile.avatar} /> Ahoy, <strong>{profile.nickname}</strong> !{' '}
-          <Link to="/profil">Modifier</Link>
+          <Link to="/profil" className="edit-link">
+            <img src={UI_ICONS.edit} alt="" className="inline-icon" />
+            Modifier
+          </Link>
         </p>
       </section>
 
-      {profile.currentGameId && (
-        <section className="panel">
-          <h2>Partie en cours</h2>
-          <p>Ton navire t’attend.</p>
-          <Link className="button primary" to={`/partie/${profile.currentGameId}`}>
-            Reprendre la partie
-          </Link>
-        </section>
-      )}
+      <div className="home-actions">
+        {profile.currentGameId && (
+          <section className="panel action-card">
+            <div className="scene">
+              <img src={SCENES.galleon} alt="" />
+            </div>
+            <h2>Partie en cours</h2>
+            <p>Ton navire t’attend.</p>
+            <Link className="button primary" to={`/partie/${profile.currentGameId}`}>
+              Reprendre la partie
+            </Link>
+          </section>
+        )}
 
-      <section className="panel">
-        <h2>Nouveau duel</h2>
-        <p>Crée un salon et envoie le lien à ton rival.</p>
-        <button className="primary" disabled={busy} onClick={createRoom}>
-          Créer un salon
-        </button>
-      </section>
-
-      <section className="panel">
-        <h2>Rejoindre un salon</h2>
-        <form className="join-form" onSubmit={join}>
-          <input
-            value={code}
-            onChange={(e) => setCode(e.target.value.toUpperCase())}
-            placeholder="CODE"
-            aria-label="Code du salon"
-            maxLength={ROOM_CODE_LENGTH + 2}
-            autoCapitalize="characters"
-            autoComplete="off"
-            spellCheck={false}
-            inputMode="text"
-          />
-          <button
-            className="secondary"
-            type="submit"
-            disabled={busy || code.trim().length < ROOM_CODE_LENGTH}
-          >
-            Rejoindre
+        <section className="panel action-card">
+          <div className="scene">
+            <img src={SCENES.rowboat} alt="" />
+          </div>
+          <h2>Nouveau duel</h2>
+          <p>Crée un salon et envoie le lien à ton rival.</p>
+          <button className="primary" disabled={busy} onClick={createRoom}>
+            Créer un salon
           </button>
-        </form>
-      </section>
+        </section>
 
-      <section className="panel links">
-        <Link to="/regles">📜 Règles du jeu</Link>
-        <Link to="/profil">🏴‍☠️ Profil, statistiques et compte</Link>
-      </section>
+        <section className="panel action-card">
+          <div className="scene">
+            <img src={SCENES.navigator} alt="" />
+          </div>
+          <h2>Rejoindre un salon</h2>
+          <form className="join-form" onSubmit={join}>
+            <input
+              value={code}
+              onChange={(e) => setCode(e.target.value.toUpperCase())}
+              placeholder="CODE"
+              aria-label="Code du salon"
+              maxLength={ROOM_CODE_LENGTH + 2}
+              autoCapitalize="characters"
+              autoComplete="off"
+              spellCheck={false}
+              inputMode="text"
+            />
+            <button
+              className="secondary"
+              type="submit"
+              disabled={busy || code.trim().length < ROOM_CODE_LENGTH}
+            >
+              Rejoindre
+            </button>
+          </form>
+        </section>
+      </div>
+
+      <nav className="home-links" aria-label="Liens">
+        <Link className="button secondary" to="/regles">
+          <img src={UI_ICONS.rules} alt="" className="inline-icon" /> Règles du jeu
+        </Link>
+        <Link className="button secondary" to="/profil">
+          <img src={UI_ICONS.profile} alt="" className="inline-icon" /> Profil, statistiques et
+          compte
+        </Link>
+      </nav>
     </div>
   );
 }
