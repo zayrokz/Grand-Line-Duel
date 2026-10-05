@@ -94,7 +94,7 @@ function Lobby({ gameId, game }: { gameId: string; game: GameDoc }) {
         </p>
       )}
       <p className="muted">Code du salon</p>
-      <p className="room-code" aria-label={`Code ${game.code?.split('').join(' ')}`}>
+      <p className="room-code" role="img" aria-label={`Code ${game.code?.split('').join(' ')}`}>
         {(game.code ?? '').split('').map((letter, i) => (
           <span key={i} aria-hidden="true">
             {letter}

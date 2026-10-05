@@ -380,10 +380,7 @@ export function GameView({ gameId, game, reserved, uid }: Props) {
 
         <div className="col-center">
           <header className="game-bar">
-            <span
-              className={`turn-indicator ${myTurn ? 'mine' : ''} ${ended ? 'ended' : ''}`}
-              aria-live="polite"
-            >
+            <span className={`turn-indicator ${myTurn ? 'mine' : ''} ${ended ? 'ended' : ''}`}>
               {!ended && <Avatar id={game.players[turnSeat]?.avatar ?? ''} size="sm" />}
               <span className="turn-label">
                 {ended ? 'Partie terminée' : myTurn ? 'À toi de jouer' : `Tour de ${oppName}`}
