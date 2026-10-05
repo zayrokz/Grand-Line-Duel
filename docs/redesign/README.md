@@ -54,21 +54,29 @@ Tous les SVG sont originaux : contour `#2A1A14`, aplats, aucun dégradé, aucun 
 
 L'app cherche `src/assets/cards/<id>.webp` (voir `theme.ts`). Copier la vignette de la famille sous l'identifiant de chaque carte, ou faire pointer `FAMILIES` / `CARD_NAMES` vers ces fichiers.
 
-| Famille (`FAMILIES`)         | Vignette                |
-| ---------------------------- | ----------------------- |
-| `earring` (Mousse)           | `art-corde.webp`        |
-| `sword` (Sabre)              | `art-sabre.webp`        |
-| `gem` (Ravitailleur)         | `art-tonneau.webp`      |
-| `necklace` (Chaloupe rapide) | `art-voile.webp`        |
-| `double` (Navire marchand)   | `art-caisse.webp`       |
-| `signet` (Navigateur)        | `art-sextant.webp`      |
-| `glove` (Abordeur)           | `art-pistolet.webp`     |
-| `tiara` (Officier)           | `art-boussole.webp`     |
-| `crown` (Capitaine)          | `art-longue-vue.webp`   |
-| `lady` (Galion)              | `art-navire.webp`       |
-| `joker` (Matelot polyvalent) | `art-mariniere.webp`    |
-| `points` (Trésor)            | `art-coffre.webp`       |
-| `diadem` (Pavillon)          | `art-drapeau-noir.webp` |
+| Famille (`FAMILIES`)         | Vignette                                |
+| ---------------------------- | --------------------------------------- |
+| `earring` (Mousse)           | `art-corde.webp`                        |
+| `sword` (Sabre)              | `art-sabre.webp`                        |
+| `gem` (Ravitailleur)         | `art-tonneau.webp`                      |
+| `necklace` (Chaloupe rapide) | `art-voile.webp`                        |
+| `double` (Navire marchand)   | `art-caisse.webp`                       |
+| `signet` (Navigateur)        | `art-sextant.webp`                      |
+| `glove` (Abordeur)           | `art-pistolet.webp`                     |
+| `tiara` (Officier)           | `art-boussole.webp`                     |
+| `crown` (Capitaine)          | `art-longue-vue.webp`                   |
+| `lady` (Galion)              | `art-navire.webp`                       |
+| `joker` (Matelot polyvalent) | `art-mariniere.webp`                    |
+| `points` (Trésor)            | `art-coffre.webp`                       |
+| `diadem` (Pavillon)          | un drapeau par couleur, voir ci-dessous |
+
+| Pavillon (`diadem`)               | Vignette                 |
+| --------------------------------- | ------------------------ |
+| `L1-11` de la cambuse (blanc)     | `art-drapeau-blanc.webp` |
+| `L1-12` des cartographes (bleu)   | `art-drapeau-bleu.webp`  |
+| `L1-13` du chantier naval (vert)  | `art-drapeau-vert.webp`  |
+| `L1-14` de la taverne (rouge)     | `art-drapeau-raye.webp`  |
+| `L1-15` de la sainte-barbe (noir) | `art-drapeau-noir.webp`  |
 
 | Carte nommée (`CARD_NAMES`)      | Vignette                  |
 | -------------------------------- | ------------------------- |
@@ -85,7 +93,7 @@ L'app cherche `src/assets/cards/<id>.webp` (voir `theme.ts`). Copier la vignette
 | `L3-12` Vent providentiel        | `art-ile.webp`            |
 | `L3-13` Trident des tempêtes     | `art-trident.webp`        |
 
-Toutes les cartes ont leur vignette. `drapeaux/` garde six variantes de drapeau (noir pommeau argent, blanc à damier, bleu, rayé rouge et noir, blanc liseré rouge, noir bordé d'or) qui ne sont attribuées à aucune carte pour l'instant.
+Toutes les cartes ont leur vignette. `drapeaux/` garde trois drapeaux de réserve (noir pommeau argent, blanc liseré rouge, noir bordé d'or) qui ne sont attribués à aucune carte.
 
 ### Cartes Empereur
 
