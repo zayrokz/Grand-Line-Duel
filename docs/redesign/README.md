@@ -54,38 +54,38 @@ Tous les SVG sont originaux : contour `#2A1A14`, aplats, aucun dégradé, aucun 
 
 L'app cherche `src/assets/cards/<id>.webp` (voir `theme.ts`). Copier la vignette de la famille sous l'identifiant de chaque carte, ou faire pointer `FAMILIES` / `CARD_NAMES` vers ces fichiers.
 
-| Famille (`FAMILIES`)         | Vignette              |
-| ---------------------------- | --------------------- |
-| `earring` (Mousse)           | `art-corde.webp`      |
-| `sword` (Sabre)              | `art-sabre.webp`      |
-| `gem` (Ravitailleur)         | `art-tonneau.webp`    |
-| `necklace` (Chaloupe rapide) | `art-voile.webp`      |
-| `double` (Navire marchand)   | `art-caisse.webp`     |
-| `signet` (Navigateur)        | `art-sextant.webp`    |
-| `glove` (Abordeur)           | `art-pistolet.webp`   |
-| `tiara` (Officier)           | `art-boussole.webp`   |
-| `crown` (Capitaine)          | `art-longue-vue.webp` |
-| `lady` (Galion)              | `art-navire.webp`     |
-| `joker` (Matelot polyvalent) | `art-mariniere.webp`  |
-| `points` (Trésor)            | `art-coffre.webp`     |
-| `diadem` (Pavillon)          | `art-canon.webp` \*   |
+| Famille (`FAMILIES`)         | Vignette                |
+| ---------------------------- | ----------------------- |
+| `earring` (Mousse)           | `art-corde.webp`        |
+| `sword` (Sabre)              | `art-sabre.webp`        |
+| `gem` (Ravitailleur)         | `art-tonneau.webp`      |
+| `necklace` (Chaloupe rapide) | `art-voile.webp`        |
+| `double` (Navire marchand)   | `art-caisse.webp`       |
+| `signet` (Navigateur)        | `art-sextant.webp`      |
+| `glove` (Abordeur)           | `art-pistolet.webp`     |
+| `tiara` (Officier)           | `art-boussole.webp`     |
+| `crown` (Capitaine)          | `art-longue-vue.webp`   |
+| `lady` (Galion)              | `art-navire.webp`       |
+| `joker` (Matelot polyvalent) | `art-mariniere.webp`    |
+| `points` (Trésor)            | `art-coffre.webp`       |
+| `diadem` (Pavillon)          | `art-drapeau-noir.webp` |
 
-| Carte nommée (`CARD_NAMES`)      | Vignette                |
-| -------------------------------- | ----------------------- |
-| `L1-26` Matelot polyvalent       | `art-mariniere.webp`    |
-| `L1-28` Bouteille à la mer       | `art-rhum.webp`         |
-| `L1-30` Bourse de doublons       | `art-emeraudes.webp`    |
-| `L2-21` Timonier aguerri         | `art-gouvernail.webp`   |
-| `L2-23` Carte au trésor déchirée | `art-carte-tresor.webp` |
-| `L2-24` Coffre au trésor         | `art-coffre.webp`       |
-| `L3-12` Vent providentiel        | `art-ile.webp`          |
-| `L1-27` Perroquet bavard         | `art-parchemin.webp` \* |
-| `L1-29` Mascotte du navire       | `art-poisson.webp` \*   |
-| `L2-22` Pavillon noir            | `art-boulets.webp` \*   |
-| `L3-11` Vaisseau fantôme         | `art-navire.webp` \*    |
-| `L3-13` Trident des tempêtes     | `art-ancre.webp` \*     |
+| Carte nommée (`CARD_NAMES`)      | Vignette                  |
+| -------------------------------- | ------------------------- |
+| `L1-26` Matelot polyvalent       | `art-mariniere.webp`      |
+| `L1-27` Perroquet bavard         | `art-perroquet.webp`      |
+| `L1-28` Bouteille à la mer       | `art-rhum.webp`           |
+| `L1-29` Mascotte du navire       | `art-singe.webp`          |
+| `L1-30` Bourse de doublons       | `art-emeraudes.webp`      |
+| `L2-21` Timonier aguerri         | `art-gouvernail.webp`     |
+| `L2-22` Pavillon noir            | `art-drapeau-noir.webp`   |
+| `L2-23` Carte au trésor déchirée | `art-carte-tresor.webp`   |
+| `L2-24` Coffre au trésor         | `art-coffre.webp`         |
+| `L3-11` Vaisseau fantôme         | `art-navire-fantome.webp` |
+| `L3-12` Vent providentiel        | `art-ile.webp`            |
+| `L3-13` Trident des tempêtes     | `art-trident.webp`        |
 
-\* Vignette provisoire : il manque un drapeau, un drapeau noir, un perroquet, un singe, un navire spectral et un trident, dans le même format (parchemin, 180 × 216).
+Toutes les cartes ont leur vignette. La famille Pavillon et la carte « Pavillon noir » partagent le drapeau noir ; un drapeau d'une autre couleur permettrait de les distinguer.
 
 ### Cartes Empereur
 
