@@ -73,7 +73,8 @@ jobs:
 
   deploy:
     name: Déploiement Firebase
-    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    # Push sur main (merge d'une PR) ou lancement manuel « Run workflow » sur main ; jamais sur une PR.
+    if: github.ref == 'refs/heads/main' && (github.event_name == 'push' || github.event_name == 'workflow_dispatch')
     runs-on: ubuntu-latest
     timeout-minutes: 30
     needs: [checks, emulator-tests, build]

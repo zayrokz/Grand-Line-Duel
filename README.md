@@ -163,7 +163,10 @@ request : lint, format, typecheck, tests du moteur, tests sur émulateur et buil
    `FIREBASE_PROJECT_ID`, `VITE_FIREBASE_API_KEY`, `VITE_FIREBASE_AUTH_DOMAIN`,
    `VITE_FIREBASE_APP_ID`, `VITE_FIREBASE_MESSAGING_SENDER_ID`, `VITE_FIREBASE_STORAGE_BUCKET`,
    `VITE_RECAPTCHA_ENTERPRISE_SITE_KEY`, `ALLOWED_ORIGINS`.
-5. Poussez sur `main` : le job « Déploiement Firebase » s'exécute après tous les tests.
+5. Poussez sur `main` (ou fusionnez une pull request dans `main`) : le job « Déploiement Firebase »
+   s'exécute après tous les tests. Pour redéployer sans changement, lancez le workflow à la main
+   (_Actions → CI / CD → Run workflow_, branche **`main`**). Sur une pull request, le déploiement
+   apparaît « skipped » : c'est normal, il n'a lieu qu'une fois la PR fusionnée.
 
 **Public / secret** : la configuration web Firebase et la clé de site reCAPTCHA sont publiques (elles
 sont servies au navigateur) ; la sécurité repose sur les règles Firestore, l'authentification et
